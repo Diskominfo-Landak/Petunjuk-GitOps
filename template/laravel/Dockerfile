@@ -3,9 +3,9 @@
 # ---- Tahap 1: pasang dependensi PHP (tanpa paket development) ----
 FROM composer:2 AS vendor
 WORKDIR /app
-COPY composer.json composer.lock ./
+COPY src/composer.json src/composer.lock ./
 RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist --no-interaction --ignore-platform-reqs
-COPY . .
+COPY src/ ./
 RUN composer dump-autoload --no-dev --optimize --classmap-authoritative --no-scripts --ignore-platform-reqs
 
 # ---- Tahap 2: image runtime (PHP-FPM Alpine) ----

@@ -1,0 +1,32 @@
+# Environment files (JANGAN PERNAH COMMIT FILE .env KE GIT)
+.env
+.env.backup
+.env.production
+src/.env
+src/.env.backup
+src/.env.production
+
+# Dependencies & Runtime artifacts
+src/vendor/
+src/node_modules/
+src/build/
+src/.phpunit.cache/
+src/.phpunit.result.cache
+src/writable/cache/*
+!src/writable/cache/index.html
+src/writable/logs/*
+!src/writable/logs/index.html
+src/writable/session/*
+!src/writable/session/index.html
+src/writable/debugbar/*
+!src/writable/debugbar/index.html
+src/writable/uploads/*
+!src/writable/uploads/index.html
+
+# OS & Editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.log

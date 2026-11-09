@@ -1,78 +1,119 @@
 # Panduan Praktis untuk Developer (Pengembang Aplikasi)
 
-Panduan ini ditujukan bagi programmer/developer di lingkungan Diskominfo Pemkab Landak untuk membuat, menguji di komputer lokal, dan mempublikasikan aplikasi ke lingkungan GitOps.
+Panduan ini ditujukan bagi programmer/developer di lingkungan Diskominfo Pemkab Landak untuk menyiapkan struktur proyek berbasis template GitOps, menguji di komputer lokal, dan mempublikasikan perubahan ke GitHub.
 
 ---
 
-## 1. Menyiapkan Proyek Baru Menggunakan Template
+## 1. Struktur Proyek & Penggunaan Folder `src/`
 
-Pilih template yang sesuai dengan teknologi yang Anda gunakan:
-- **Laravel 12 (PHP 8.3)**: `template/laravel/`
-- **CodeIgniter (PHP 8.2 / 7.4)**: `template/codeigniter/`
+Pada standar GitOps Pemkab Landak, berkas infrastruktur kontainerisasi (Docker & CI/CD) berada di **root repositori**, sedangkan seluruh kode sumber aplikasi Anda diletakkan di dalam **folder `src/`**:
 
-Salin berkas konfigurasi dari folder template ke root proyek Anda:
-```bash
-# Contoh untuk proyek Laravel:
-cp -r template/laravel/* /path/ke/proyek-anda/
-cp template/laravel/.github/workflows/ci.yml /path/ke/proyek-anda/.github/workflows/
+```text
+repositori-aplikasi-anda/
+├── Dockerfile                  # Konfigurasi build image Docker (membaca kode dari src/)
+├── .dockerignore               # Pengecualian file saat proses docker build
+├── .gitignore                  # Mencegah file .env dan vendor ikut ter-commit
+├── .gitattributes              # Menjaga line-ending LF pada skrip Linux
+├── compose.yaml                # Konfigurasi layanan container (app, web, db)
+├── compose.build.yaml          # Override untuk build lokal di laptop developer
+├── .env.docker.example         # Template variabel environment runtime Docker
+├── docker/                     # Konfigurasi Nginx, PHP-FPM, dan entrypoint
+├── .github/workflows/ci.yml    # Pipeline otomatis GitHub Actions ke GHCR
+└── src/                        # << TEMPAT KODE SUMBER APLIKASI ANDA >>
 ```
 
-### Konfigurasi Awal di Proyek Anda:
-1. Buka `compose.yaml`:
-   - Ganti `name: nama-aplikasi` dengan nama repositori Anda.
-   - Ganti baris `image:` menjadi `ghcr.io/diskominfo-landak/<nama-repo>:${IMAGE_TAG:-development}`.
-   - **Tentukan Tipe Aplikasi:**
-     - Jika aplikasi memiliki tampilan web (UI pengguna), buka port port-mapping lokal (misal: `"127.0.0.1:808X:80"`).
-     - Jika aplikasi adalah microservice/API internal, matikan mapping port ke host agar hanya bisa diakses via internal network `api-net`.
-2. Buat file `.env` lokal dari `.env.docker.example` untuk pengujian lokal.
+Pilih template yang sesuai dengan framework aplikasi Anda:
+- **Laravel (PHP 8.3 + MySQL 8.4)**: [`template/laravel/`](../template/laravel/)
+- **CodeIgniter (CI 4 / CI 3)**: [`template/codeigniter/`](../template/codeigniter/)
+
+### Cara Memulai:
+1. Salin seluruh isi folder template pilihan Anda (`template/laravel/` atau `template/codeigniter/`, termasuk file tersembunyi `.gitignore`, `.dockerignore`, `.gitattributes`, `.env.docker.example`, dan `.github/`) ke dalam repositori proyek Anda.
+2. **Jika membuat aplikasi baru dari nol**: Anda bisa langsung mulai mengedit kode di dalam folder `src/` (sudah berisi kerangka proyek murni Laravel atau CodeIgniter 4).
+3. **Jika memigrasikan aplikasi yang sudah ada**: Hapus isi bawaan di dalam folder `src/`, lalu pindahkan seluruh file kode aplikasi Anda ke dalam folder `src/`.
 
 ---
 
-## 2. Menjalankan & Menguji Aplikasi di Komputer Lokal
+## 2. Empat Bagian yang Wajib Disesuaikan di `compose.yaml`
 
-Untuk menguji container aplikasi di komputer lokal (Laptop / PC pengembang), gunakan opsi `compose.build.yaml` agar Docker melakukan build lokal dari kode sumber:
+Buka file `compose.yaml` di root proyek Anda, lalu sesuaikan **4 titik konfigurasi** yang ditandai dengan `[EDIT 1/4]` sampai `[EDIT 4/4]`:
+
+| Penanda | Bagian di `compose.yaml` | Contoh Penggantian | Aturan & Penjelasan |
+|---|---|---|---|
+| **`[EDIT 1/4]`** | `name: nama-aplikasi` | `name: finda-app` | Nama stack Docker Compose (gunakan nama repositori Anda, huruf kecil). |
+| **`[EDIT 2/4]`** | `image: ghcr.io/diskominfo-landak/nama-aplikasi:${IMAGE_TAG:-development}` | `image: ghcr.io/diskominfo-landak/finda-app:${IMAGE_TAG:-development}` | Wajib sama persis dengan nama repositori GitHub di organisasi `diskominfo-landak`. |
+| **`[EDIT 3/4]`** | Blok `ports:` pada service `web` | `"127.0.0.1:8081:80"` *(Web UI)* **atau** hapus blok `ports:` *(API Service)* | Lihat panduan pemilihan port di bawah. |
+| **`[EDIT 4/4]`** | `aliases:` di bawah `networks.api-net` | `- finda-app-web` | Nama domain internal di jaringan Docker `api-net` (`<nama-repo>-web`). |
+
+### Panduan Pemilihan Port (`[EDIT 3/4]`):
+1. **Aplikasi Web Pengguna (Human-facing, diakses via browser)**:
+   - Gunakan mapping port lokal:
+     ```yaml
+     ports:
+       - "127.0.0.1:8081:80"
+     ```
+   - **Penting**: Nomor port di server VM (misal `8081`, `8082`, dst.) **ditentukan oleh Admin Infrastruktur (Network Administrator)** agar tidak bentrok antar aplikasi di server dan agar didaftarkan ke Reverse Proxy domain resmi `.landakkab.go.id`.
+2. **Layanan API Internal (Machine-to-Machine di belakang `api-gateway`)**:
+   - **Hapus** atau beri tanda komentar (`#`) pada blok `ports:` sehingga port container tidak terbuka ke host:
+     ```yaml
+     volumes:
+       - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+       - app-storage:/var/www/storage:ro
+     networks:
+       internal:
+       api-net:
+         aliases:
+           - nama-aplikasi-web
+     ```
+   - Layanan Anda akan dipanggil oleh `api-gateway` secara internal melalui jaringan `api-net` menggunakan nama alias (`http://nama-aplikasi-web`).
+
+---
+
+## 3. Menjalankan & Menguji Aplikasi di Komputer Lokal
+
+Sebelum mendorong kode ke GitHub, uji container di laptop Anda menggunakan `compose.build.yaml`:
 
 ```bash
-# Build dan jalankan container di lokal:
+# 1. Buat jaringan Docker 'api-net' (cukup 1 kali di laptop Anda):
+docker network create api-net 2>/dev/null || true
+
+# 2. Buat file .env runtime Docker di root proyek dari template:
+cp .env.docker.example .env
+# (Khusus Laravel: pastikan APP_KEY di .env sudah terisi, misal base64:...)
+
+# 3. Build dan jalankan container di lokal:
 docker compose -f compose.yaml -f compose.build.yaml up -d --build
 
-# Melihat log aplikasi:
+# 4. Periksa status kesehatan container & log aplikasi:
+docker compose ps
 docker compose logs -f app
 
-# Mengakses container PHP untuk artisan atau debugging:
+# 5. Mengakses shell container PHP (untuk menjalankan artisan / migrasi / debug):
 docker compose exec app sh
 
-# Menghentikan container:
+# 6. Menghentikan container:
 docker compose down
 ```
 
 ---
 
-## 3. Alur Kerja Git & Publikasi Fitur
+## 4. Alur Kerja Git & Publikasi Fitur
 
 ### A. Alur Pengembangan Harian (Branch `development`)
-1. Kembangkan fitur di branch fitur lokal Anda (`feature/nama-fitur`).
-2. Gabungkan (*merge*) ke branch `development` lokal, lalu push ke GitHub:
+1. Kembangkan fitur dan pastikan unit test lulus di lokal.
+2. Commit dan push perubahan ke branch `development`:
    ```bash
    git checkout development
-   git merge feature/nama-fitur
+   git add .
+   git commit -m "feat: tambah fitur laporan bulanan"
    git push origin development
    ```
-3. GitHub Actions otomatis melakukan:
-   - Linting & Unit Test
-   - Audit celah keamanan dependensi (`composer audit`)
-   - Build image container dan push ke `ghcr.io/diskominfo-landak/<nama-repo>:development`
-4. Maksimal dalam 5 menit, VM Development akan menarik image terbaru tersebut dan memperbarui aplikasi di server uji.
+3. **GitHub Actions** secara otomatis akan:
+   - Menjalankan unit test dan pemeriksaan keamanan paket (`composer audit`) di dalam folder `src/`.
+   - Mem-build image Docker dan mengunggahnya ke `ghcr.io/diskominfo-landak/<nama-repo>:development`.
+4. Maksimal dalam **5 menit**, cron di **VM Development** akan menarik image baru tersebut dan memperbarui layanan secara otomatis.
 
-### B. Alur Rilis ke Produksi (Branch `main` & Tag Versi)
-1. Setelah fitur teruji di VM Development, buat **Pull Request (PR)** dari `development` ke `main`.
-2. Minta review kepada Lead Developer / Admin GitHub Organisasi.
-3. Setelah PR di-merge ke `main`, buat tag rilis versi baru sesuai SemVer:
-   ```bash
-   git checkout main
-   git pull origin main
-   git tag v1.0.1 -m "Rilis v1.0.1: Perbaikan bug login dan update modul wilayah"
-   git push origin v1.0.1
-   ```
-4. GitHub Actions akan mem-build image dengan tag bernomor (`1.0.1`).
-5. Informasikan kepada **Network Administrator** untuk memasang rilis tersebut ke VM Production.
+### B. Alur Pengajuan Rilis ke Produksi (Pull Request ke `main`)
+1. Setelah fitur teruji dan stabil di VM Development, buat **Pull Request (PR)** di GitHub dari branch `development` menuju branch `main`.
+2. Sertakan ringkasan perubahan dan catatan migrasi/konfigurasi baru (jika ada) pada deskripsi PR.
+3. **Lead Developer / Admin Organisasi** akan me-review PR, melakukan merge ke `main`, dan menerbitkan **Tag Rilis SemVer** resmi (`vX.Y.Z`, contoh: `v1.0.1`).
+4. Setelah GitHub Actions selesai mem-build image bernomor (`1.0.1`), **Network Administrator** akan memasang versi tersebut ke VM Production menggunakan skrip `release.sh`.

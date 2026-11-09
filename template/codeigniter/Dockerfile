@@ -3,19 +3,18 @@
 # ---- Tahap 1: pasang dependensi Composer jika ada composer.json ----
 FROM composer:2 AS vendor
 WORKDIR /app
-COPY composer.json* composer.lock* ./
+COPY src/composer.json* src/composer.lock* ./
 RUN if [ -f composer.json ]; then \
       composer install --no-dev --no-scripts --no-autoloader --prefer-dist --no-interaction --ignore-platform-reqs; \
     else \
       mkdir -p vendor; \
     fi
-COPY . .
+COPY src/ ./
 RUN if [ -f composer.json ]; then \
       composer dump-autoload --no-dev --optimize --classmap-authoritative --no-scripts --ignore-platform-reqs; \
     fi
 
 # ---- Tahap 2: image runtime (PHP-FPM Alpine) ----
-# Mendukung PHP 8.2/8.3 untuk CI 4, atau sesuaikan jika masih memakai PHP 7.4 untuk CI 3 lawas
 FROM php:8.2-fpm-alpine AS app
 
 RUN apk add --no-cache su-exec icu-dev libpng-dev libzip-dev \

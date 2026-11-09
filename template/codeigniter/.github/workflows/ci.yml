@@ -10,9 +10,30 @@ permissions:
   contents: read
 
 jobs:
+  audit:
+    name: Cek dependensi dan keamanan paket
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, intl, mysqli, pdo_mysql
+          coverage: none
+
+      - name: Pasang dependensi dan audit (jika memakai Composer)
+        working-directory: src
+        run: |
+          if [ -f composer.json ]; then
+            composer install --no-interaction --prefer-dist --no-progress
+            composer audit
+          fi
+
   image:
     name: Build dan push image container
     runs-on: ubuntu-24.04
+    needs: audit
     permissions:
       contents: read
       packages: write

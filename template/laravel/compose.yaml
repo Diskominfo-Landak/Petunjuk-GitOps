@@ -1,0 +1,82 @@
+name: nama-aplikasi
+
+services:
+  app:
+    image: ghcr.io/diskominfo-landak/nama-aplikasi:${IMAGE_TAG:-development}
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      RUN_MIGRATIONS: "true"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - app-storage:/var/www/html/storage
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD-SHELL", "pidof php-fpm > /dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  web:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    depends_on:
+      app:
+        condition: service_healthy
+    volumes:
+      - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - app-storage:/var/www/storage:ro
+    # --------------------------------------------------------------------------
+    # PILIHAN PORT:
+    # 1. Jika Aplikasi Web (Human-facing): Buka port lokal ke Reverse Proxy VM
+    #    ports:
+    #      - "127.0.0.1:8081:80"
+    # 2. Jika API Service (Machine-to-Machine): Biarkan port tertutup dari host,
+    #    cukup hubungkan ke api-net agar hanya bisa diakses via api-gateway.
+    # --------------------------------------------------------------------------
+    ports:
+      - "127.0.0.1:8081:80"
+    networks:
+      internal:
+      api-net:
+        aliases:
+          - nama-aplikasi-web
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1/up || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  db:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-nama_db}
+      MYSQL_USER: ${DB_USERNAME:-db_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-db_password}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_password}
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+networks:
+  internal:
+  api-net:
+    name: api-net
+    external: true
+
+volumes:
+  app-storage:
+  db-data:

@@ -1,0 +1,11 @@
+# Ignore system / history files
+HANDOVER-SERAH-TERIMA.md
+LAPORAN-SERAH-TERIMA-GITOPS-PEMKAB-LANDAK.md
+
+# OS / Editor files
+.DS_Store
+Thumbs.db
+*.swp
+*.log
+.vscode/
+.idea/

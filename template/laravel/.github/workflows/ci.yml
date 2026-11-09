@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  push:
+    branches: [development, main]
+    tags: ['v*']
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Tes dan audit paket
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, pdo_mysql, fileinfo
+          coverage: none
+
+      - name: Pasang dependensi
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Siapkan environment tes
+        run: |
+          cp .env.example .env 2>/dev/null || cp .env.docker.example .env
+          php artisan key:generate
+
+      - name: Jalankan unit/feature test
+        run: php artisan test
+
+      - name: Cek kerentanan paket
+        run: composer audit
+
+  image:
+    name: Build dan push image container
+    runs-on: ubuntu-24.04
+    needs: test
+    permissions:
+      contents: read
+      packages: write
+    env:
+      # Push image hanya untuk branch development atau tag versi release (v1.0.0)
+      PUBLISH: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/development' || startsWith(github.ref, 'refs/tags/v')) }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Login ke GitHub Container Registry
+        if: env.PUBLISH == 'true'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Tentukan metadata tag image
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=ref,event=branch
+            type=sha,format=short
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+
+      - name: Build dan push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: ${{ env.PUBLISH == 'true' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

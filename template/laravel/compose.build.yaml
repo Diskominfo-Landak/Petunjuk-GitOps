@@ -1,0 +1,6 @@
+# Override untuk build dan test lokal di komputer developer tanpa menarik dari registry
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile

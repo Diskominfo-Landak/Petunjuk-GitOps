@@ -7,8 +7,8 @@ Panduan ini ditujukan bagi programmer/developer di lingkungan Diskominfo Pemkab 
 ## 1. Menyiapkan Proyek Baru Menggunakan Template
 
 Pilih template yang sesuai dengan teknologi yang Anda gunakan:
-- **Laravel 12 (PHP 8.3)**: `c:\Proyek\gitops\template\laravel\`
-- **CodeIgniter (PHP 8.2 / 7.4)**: `c:\Proyek\gitops\template\codeigniter\`
+- **Laravel 12 (PHP 8.3)**: `template/laravel/`
+- **CodeIgniter (PHP 8.2 / 7.4)**: `template/codeigniter/`
 
 Salin berkas konfigurasi dari folder template ke root proyek Anda:
 ```bash

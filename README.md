@@ -1,12 +1,12 @@
 # Panduan & Template GitOps Pemerintah Kabupaten Landak
 
-Repositori ini merupakan pusat dokumentasi standar, panduan operasional, dan template kontainerisasi siap pakai untuk implementasi **GitOps** di lingkungan Pemerintah Kabupaten Landak (Diskominfo Landak).
+Repositori ini merupakan pusat dokumentasi standar, panduan pengembang aplikasi, dan template kontainerisasi siap pakai untuk implementasi **GitOps** di lingkungan Pemerintah Kabupaten Landak (Diskominfo Landak).
 
 ---
 
 ## 🏗️ Arsitektur Singkat GitOps Pemkab Landak
 
-Pola GitOps Pemkab Landak memodernisasi dan menyempurnakan referensi GitOps Pemprov Kalbar dengan penyesuaian infrastruktur nyata di Landak:
+Pola GitOps Pemkab Landak memodernisasi alur pengembangan aplikasi di lingkungan Pemkab Landak:
 
 ```
 [ Developer ]
@@ -17,7 +17,7 @@ Pola GitOps Pemkab Landak memodernisasi dan menyempurnakan referensi GitOps Pemp
       ▼ (GitHub Actions CI: Test, Security Audit, Docker Multi-stage Build)
 [ GitHub Container Registry (ghcr.io) ]
       │
-      ├───> [ VM Development (10.20.10.10) ]
+      ├───> [ VM Development (Server Uji) ]
       │     Penarikan otomatis via cron (ops/update-dev.sh tiap 5 menit)
       │
       └───> [ VM Production ]
@@ -25,8 +25,8 @@ Pola GitOps Pemkab Landak memodernisasi dan menyempurnakan referensi GitOps Pemp
             Dilengkapi Healthcheck & Auto-Rollback
 ```
 
-### Keunggulan Dibanding Template Baseline Pemprov Kalbar:
-1. **Keamanan Kredensial**: Tanpa menanam rahasia/password di Docker image (`--build-arg` dihapus). Semua kredensial runtime berada di file `.env` server dengan izin terbatas (`chmod 600`).
+### Keunggulan Alur GitOps:
+1. **Keamanan Kredensial**: Tanpa menanam rahasia/password di Docker image (`--build-arg` dihindari). Semua kredensial runtime berada di file `.env` server dengan izin terbatas (`chmod 600`).
 2. **Efisiensi CI/CD**: Memanfaatkan Runner GitHub Ubuntu resmi dan build caching cepat (`ghcr.io`), tanpa membebani server lokal untuk proses build.
 3. **Stabilitas Rilis**: Sistem rilis SemVer (`vX.Y.Z`) yang melakukan verifikasi kontainer aktif dan rollback instan jika aplikasi gagal lolos uji kesehatan (*healthcheck*).
 
@@ -35,39 +35,30 @@ Pola GitOps Pemkab Landak memodernisasi dan menyempurnakan referensi GitOps Pemp
 ## 📁 Struktur Direktori Repositori
 
 ```text
-gitops/
+Petunjuk-GitOps/
 ├── README.md                          # Ringkasan repositori (dokumen ini)
-├── HANDOVER-SERAH-TERIMA.md           # Berkas teknis historis serah terima proyek
 │
 ├── template/                          # Template siap pakai untuk proyek baru OPD
 │   ├── laravel/                       # Template Laravel 12 + PHP 8.3 Alpine + MySQL 8.4
 │   └── codeigniter/                   # Template CodeIgniter (CI 4 / CI 3) + PHP Alpine
 │
-├── ops/                               # Skrip operasional bersama untuk server/VM
+├── ops/                               # Skrip operasional rujukan untuk server
 │   ├── update-dev.sh                  # Skrip penarik image otomatis di VM Development
 │   └── release.sh                     # Skrip rilis produksi dengan auto-rollback
 │
-└── docs/                              # Panduan lengkap sesuai peran
-    ├── 01-standar-gitops-sop.md       # Standar penamaan, branch, SemVer, & bahan KepBup
+└── docs/                              # Panduan pengembangan aplikasi
+    ├── 01-standar-gitops-sop.md       # Standar penamaan, branch, SemVer, & alur rilis
     ├── 02-panduan-developer.md        # Panduan teknis untuk programmer/developer OPD
-    ├── 03-panduan-admin-github.md     # Panduan kelola organisasi GitHub & GHCR
-    ├── 04-panduan-infrastruktur-ops.md# Panduan Network Admin (setup VM, proxy, backup)
-    └── 05-integrasi-sso-keycloak.md   # Panduan integrasi SSO Keycloak (ASN & Publik)
+    └── 03-integrasi-sso-keycloak.md   # Panduan integrasi SSO Keycloak (ASN & Publik)
 ```
 
 ---
 
-## 🚀 Memulai (Quick Start)
+## 🚀 Memulai (Quick Start untuk Developer)
 
-### 1. Bagi Pengembang Aplikasi (Developer)
-Untuk memasang GitOps pada aplikasi baru atau aplikasi lama:
-- Buka panduan di [`docs/02-panduan-developer.md`](file:///c:/Proyek/gitops/docs/02-panduan-developer.md).
-- Salin berkas dari folder [`template/laravel`](file:///c:/Proyek/gitops/template/laravel) atau [`template/codeigniter`](file:///c:/Proyek/gitops/template/codeigniter) ke repositori Anda.
+Bagi pengembang sistem atau programmer OPD yang ingin menerapkan standar GitOps pada aplikasi baru atau yang sudah berjalan:
 
-### 2. Bagi Administrator GitHub (Tim Aplikasi)
-- Baca panduan tata kelola repositori di [`docs/03-panduan-admin-github.md`](file:///c:/Proyek/gitops/docs/03-panduan-admin-github.md).
-- Pastikan izin workflow package diatur ke *Read and write permissions*.
-
-### 3. Bagi Network Administrator / Tim Infrastruktur
-- Baca panduan konfigurasi VM dan skrip rilis di [`docs/04-panduan-infrastruktur-ops.md`](file:///c:/Proyek/gitops/docs/04-panduan-infrastruktur-ops.md).
-- Pasang skrip `ops/update-dev.sh` di crontab VM Development dan `ops/release.sh` di VM Production.
+1. Pelajari tata cara branch dan standar Semantic Versioning di [`docs/01-standar-gitops-sop.md`](docs/01-standar-gitops-sop.md).
+2. Ikuti langkah pembuatan dan pengujian lokal di [`docs/02-panduan-developer.md`](docs/02-panduan-developer.md).
+3. Salin berkas konfigurasi dari folder [`template/laravel`](template/laravel) atau [`template/codeigniter`](template/codeigniter) ke dalam repositori aplikasi Anda.
+4. Jika aplikasi membutuhkan autentikasi pengguna (ASN atau Masyarakat), pelajari integrasinya di [`docs/03-integrasi-sso-keycloak.md`](docs/03-integrasi-sso-keycloak.md).

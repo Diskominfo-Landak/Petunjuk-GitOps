@@ -1,6 +1,8 @@
-# Ignore system / history files
+# Ignore system / history / checkpoint files
 HANDOVER-SERAH-TERIMA.md
 LAPORAN-SERAH-TERIMA-GITOPS-PEMKAB-LANDAK.md
+CHECKPOINT-LANGKAH-3.md
+CHECKPOINT*.md
 
 # OS / Editor files
 .DS_Store

@@ -3,6 +3,7 @@
 Template ini dirancang untuk aplikasi berbasis CodeIgniter (CodeIgniter 4 atau CodeIgniter 3) di lingkungan Pemkab Landak dengan pola GitOps:
 - **Pemisahan Jelas (Folder `src/`)**: Seluruh kode sumber aplikasi CodeIgniter diletakkan di dalam folder `src/`. Berkas konfigurasi Docker & CI/CD berada di root repositori.
 - **Tanpa Rahasia di Image**: Tidak ada password/kredensial yang tertanam di Docker image. Seluruh variabel rahasia dimuat saat runtime dari file `.env` di server.
+- **Migrasi Otomatis (CI 4)**: Mendukung eksekusi migrasi database otomatis saat container start (`php spark migrate --all`).
 - **CI/CD Otomatis**: Melakukan audit celah keamanan paket (`composer audit`) serta mem-build dan mengunggah image ke `ghcr.io`.
 
 ---
@@ -21,7 +22,7 @@ proyek-ci-anda/
 ├── docker/
 │   ├── nginx.conf              # Konfigurasi web server Nginx
 │   ├── php.ini                 # Konfigurasi runtime PHP-FPM & OPcache
-│   └── entrypoint.sh           # Skrip pengaturan izin folder cache/writable
+│   └── entrypoint.sh           # Skrip izin folder cache/writable & auto-migration
 ├── .github/
 │   └── workflows/
 │       └── ci.yml              # Pipeline GitHub Actions ke GHCR
@@ -48,7 +49,38 @@ proyek-ci-anda/
 
 ---
 
-## 3. Empat Bagian yang Wajib Disesuaikan di `compose.yaml`
+## 3. Pengelolaan Database & Migrasi (Khusus Developer CI)
+
+### A. Untuk CodeIgniter 4 (Sangat Disarankan Menggunakan Migration):
+CodeIgniter 4 memiliki CLI bernama **`spark`** (setara dengan `artisan` di Laravel). Developer sangat disarankan mengelola perubahan tabel lewat migration agar tersinkronisasi otomatis ke server.
+
+1. **Membuat File Migrasi Baru di Komputer Lokal**:
+   ```bash
+   cd src
+   php spark make:migration NamaTabelBaru
+   ```
+   File migrasi akan terbuat di `src/app/Database/Migrations/`. Tulis struktur tabel di method `up()` dan `down()`.
+
+2. **Menjalankan Migrasi di Lokal**:
+   ```bash
+   php spark migrate
+   ```
+
+3. **Bagaimana Migrasi Berjalan di Server VM?**
+   - Di file `compose.yaml` sudah terpasang `RUN_MIGRATIONS: "true"`.
+   - Ketika developer melakukan `git push` dan image baru ditarik oleh server, skrip `docker/entrypoint.sh` akan **otomatis menjalankan `php spark migrate --all`**.
+   - Admin server tidak perlu login SSH untuk membuat atau mengubah tabel secara manual!
+
+### B. Untuk CodeIgniter 3 (Aplikasi Legacy Tanpa Fitur Migration Bawaan):
+Jika aplikasi masih menggunakan CI 3 lama yang struktur tabelnya berupa dump file SQL:
+1. Hubungi Admin VM untuk melakukan import file `.sql` perdana ke container database:
+   ```bash
+   docker compose exec -T db mysql -u db_user -prahasia_db_user ci_db < struktur_awal.sql
+   ```
+
+---
+
+## 4. Empat Bagian yang Wajib Disesuaikan di `compose.yaml`
 
 Buka file `compose.yaml` di root proyek Anda, lalu sesuaikan **4 bagian** yang telah diberi penanda `[EDIT 1/4]` sampai `[EDIT 4/4]`:
 
@@ -61,7 +93,7 @@ Buka file `compose.yaml` di root proyek Anda, lalu sesuaikan **4 bagian** yang t
 
 ---
 
-## 4. Langkah Uji Coba Build di Komputer Lokal
+## 5. Langkah Uji Coba Build di Komputer Lokal
 
 ```bash
 # 1. Buat jaringan eksternal api-net (cukup dijalankan sekali di komputer Anda)

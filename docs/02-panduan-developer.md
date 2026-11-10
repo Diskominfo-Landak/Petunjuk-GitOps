@@ -34,7 +34,7 @@ repositori-aplikasi-anda/
 
 ## 2. Tanggung Jawab Database & Pengelolaan Variabel `.env`
 
-Di lingkungan GitOps, developer **tidak diberikan akses SSH langsung ke server VM**. Seluruh perubahan struktur database dan konfigurasi harus disampaikan melalui repositori Git:
+Di lingkungan GitOps, developer **tidak diberikan akses SSH langsung ke server VM**. Seluruh perubahan struktur database dan konfigurasi harus disampaikan melalui repositori Git dan koordinasi aman dengan Admin:
 
 ### A. Seluruh Perubahan Database Wajib Menggunakan Migration
 - **Dilarang keras** mengubah tabel atau kolom secara manual di database server.
@@ -43,9 +43,16 @@ Di lingkungan GitOps, developer **tidak diberikan akses SSH langsung ke server V
   - CodeIgniter 4: `php spark make:migration CreateTabelBaru`
 - Saat aplikasi di-deploy ke server, sistem GitOps akan **secara otomatis menjalankan migrasi** (`migrate --force`) saat container menyala.
 
-### B. Mendaftarkan Variabel Konfigurasi di `.env.docker.example`
-- Jika aplikasi Anda membutuhkan variabel baru (misal: `MAIL_HOST`, `S3_BUCKET`, `KEYCLOAK_CLIENT_SECRET`), **wajib daftarkan contoh variabel tersebut di file `.env.docker.example`**.
-- File `.env.docker.example` adalah dokumen acuan bagi Admin Server untuk mengetahui variabel apa saja yang harus diisikan pada file `.env` di server fisik.
+### B. Aturan `.env.docker.example` vs `.env` Lokal Developer
+- **Nama Variabel Wajib Sama**: Seluruh variabel yang digunakan aplikasi di kodingan Anda (misal `PAYMENT_API_KEY`, `WA_GATEWAY_TOKEN`, `DEFAULT_ADMIN_PASSWORD`) **wajib dicantumkan namanya di file `.env.docker.example`**.
+- **Nilai Wajib Menggunakan Nilai Contoh / Dummy**: 
+  Di file `.env.docker.example`, nilainya adalah nilai contoh/dummy (misal: `PAYMENT_API_KEY=masukkan_api_key_disini`). **JANGAN PERNAH** menaruh password asli atau kredensial rahasia di file `.env.docker.example` karena file ini ter-commit ke Git.
+
+### C. Cara Menyerahkan Kredensial Sensitif (API Key / Password) ke VM Administrator
+Jika aplikasi Anda membutuhkan kredensial rahasia sungguhan (misal: production API Key, secret Keycloak, atau password akun Superadmin untuk seeder):
+1. **Dilarang Keras** menaruh data rahasia di Git commit, issue, atau Pull Request.
+2. Serahkan nilai rahasia tersebut kepada **Admin VM / Admin Organisasi GitHub** melalui **jalur komunikasi privat yang aman** (misal: pesan langsung terenkripsi / bertatap muka).
+3. Admin VM yang akan memasukkan nilai rahasia tersebut ke dalam file `/opt/apps/<nama-aplikasi>/.env` di server fisik saat proses deployment.
 
 ---
 

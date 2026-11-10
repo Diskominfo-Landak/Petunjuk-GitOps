@@ -53,6 +53,9 @@ Petunjuk-GitOps/
     ├── 02-panduan-developer.md        # Panduan teknis untuk programmer/developer OPD
     ├── 03-integrasi-sso.md            # Konsep arsitektur SSO Pemkab Landak (ASN & Publik)
     ├── 04-arsitektur-keselarasan-kalbar-swarm.md # Arsitektur keselarasan (Swarm vs Compose)
+    ├── 05-standar-keamanan-aplikasi.md # Standar secure coding & mitigasi judi online / deface
+    ├── 06-manajemen-proyek-github.md  # Manajemen tugas tim (Kanban Board & GitHub Issues)
+    ├── panduan-pembuatan-akun-github.md # Panduan onboarding GitHub & 2FA untuk staf/magang baru
     ├── panduan-sso-laravel.md         # Tutorial integrasi SSO untuk Laravel
     └── panduan-sso-codeigniter.md     # Tutorial integrasi SSO untuk CodeIgniter 4
 ```
@@ -61,16 +64,19 @@ Petunjuk-GitOps/
 
 ## 🚀 Memulai (Quick Start untuk Developer)
 
-Bagi pengembang sistem atau programmer OPD yang ingin menerapkan standar GitOps pada aplikasi baru atau yang sudah berjalan:
+Bagi pengembang sistem, programmer OPD, atau tenaga magang yang ingin menerapkan standar GitOps:
 
-1. Pelajari tata cara branch dan standar Semantic Versioning di [`docs/01-standar-gitops-sop.md`](docs/01-standar-gitops-sop.md).
-2. Ikuti langkah pembuatan dan pengujian lokal di [`docs/02-panduan-developer.md`](docs/02-panduan-developer.md).
-3. Salin berkas konfigurasi dari folder template yang sesuai ke repositori aplikasi Anda:
+1. Jika belum memiliki akun, ikuti [`docs/panduan-pembuatan-akun-github.md`](docs/panduan-pembuatan-akun-github.md) untuk setup akun dan aktivasi 2FA.
+2. Pelajari tata cara branch dan standar Semantic Versioning di [`docs/01-standar-gitops-sop.md`](docs/01-standar-gitops-sop.md).
+3. Ikuti langkah pembuatan dan pengujian lokal di [`docs/02-panduan-developer.md`](docs/02-panduan-developer.md).
+4. Salin berkas konfigurasi dari folder template yang sesuai ke repositori aplikasi Anda:
    - [`template/laravel`](template/laravel) (Laravel 12 / PHP 8.3)
    - [`template/codeigniter`](template/codeigniter) (CodeIgniter 4 / CI 3)
    - [`template/nodejs`](template/nodejs) (Node.js 20 / Express)
    - [`template/php-native`](template/php-native) (PHP Native / Legacy)
-4. Jika aplikasi membutuhkan autentikasi login pengguna:
+5. Pastikan kodingan mematuhi kaidah keamanan di [`docs/05-standar-keamanan-aplikasi.md`](docs/05-standar-keamanan-aplikasi.md) sebelum diajukan uji keamanan ke Seksi Persandian.
+6. Kelola penugasan fitur dan perbaikan bug tim secara transparan menggunakan [`docs/06-manajemen-proyek-github.md`](docs/06-manajemen-proyek-github.md).
+7. Jika aplikasi membutuhkan autentikasi login pengguna:
    - Pelajari konsep SSO di [`docs/03-integrasi-sso.md`](docs/03-integrasi-sso.md).
    - Ikuti tutorial teknis sesuai framework Anda: [`docs/panduan-sso-laravel.md`](docs/panduan-sso-laravel.md) atau [`docs/panduan-sso-codeigniter.md`](docs/panduan-sso-codeigniter.md).
-5. Pelajari perbandingan arsitektur teknis dan justifikasi regulasi KepBup di [`docs/04-arsitektur-keselarasan-kalbar-swarm.md`](docs/04-arsitektur-keselarasan-kalbar-swarm.md).
+8. Pelajari perbandingan arsitektur teknis dan justifikasi regulasi KepBup di [`docs/04-arsitektur-keselarasan-kalbar-swarm.md`](docs/04-arsitektur-keselarasan-kalbar-swarm.md).

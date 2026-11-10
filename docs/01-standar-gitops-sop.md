@@ -14,7 +14,7 @@ Sesuai dengan *Juknis Pedoman Pembangunan dan Pengembangan Aplikasi Pemkab Landa
    - **Nama repositori diselaraskan langsung dengan nama subdomain produksi aplikasi**.
    - *Contoh*: Jika aplikasi beralamat di `https://simpeg.landakkab.go.id`, maka nama repositorinya wajib **`simpeg`** (atau `simpeg-app`).
 3. **Pemberian Domain Lingkungan Uji (Development)**:
-   - Admin Organisasi / Admin Jaringan secara otomatis akan menetapkan domain development dengan format:
+   - GitOps Administrator / Network Administrator secara otomatis akan menetapkan domain development dengan format:
      `https://<nama-subdomain>-dev.landakkab.go.id` (contoh: `https://simpeg-dev.landakkab.go.id`).
 4. **Nama Image Container (GHCR)**:
    - Format: `ghcr.io/diskominfo-landak/<nama-repo>:<tag>`
@@ -52,6 +52,11 @@ Sistem menggunakan alur kerja berbasis dua cabang utama:
 
 ## 4. Matriks Tanggung Jawab (RACI)
 
+Tatanan tata kelola GitOps Pemkab Landak dibagi ke dalam **3 Peran Utama**:
+1. **Developer (Pengembang Aplikasi)**
+2. **GitOps Administrator (Pengelola Repositori GitHub & VM Development)**
+3. **Network Administrator (Pengelola Infrastruktur Jaringan, Server Fisik, & VM Production)**
+
 ### Definisi Tingkat Peran (RACI):
 - **Responsible (R)**: Pihak yang bertugas mengeksekusi dan menyelesaikan pekerjaan teknis secara langsung.
 - **Accountable (A)**: Pihak yang memegang tanggung jawab akhir, berhak mengambil keputusan/persetujuan (*approval*), dan memastikan pekerjaan tuntas. Hanya ada 1 pihak Accountable per aktivitas.
@@ -60,12 +65,13 @@ Sistem menggunakan alur kerja berbasis dua cabang utama:
 
 ### Matriks Aktivitas:
 
-| Aktivitas | Tim Aplikasi (Developer) | Admin GitHub Organisasi | Network Administrator (Infrastruktur) |
+| Aktivitas | Developer | GitOps Administrator | Network Administrator |
 |---|---|---|---|
-| Penulisan Kode & Unit Test | **R**esponsible | **A**ccountable | **I**nformed |
+| Penulisan Kode, Migrasi DB, & Unit Test | **R**esponsible | **A**ccountable | **I**nformed |
 | Pembuatan Repositori & Template | **C**onsulted | **R**esponsible / **A**ccountable | **I**nformed |
+| Inisialisasi Aplikasi di VM Dev (`.env`, port, cron) | **I**nformed | **R**esponsible / **A**ccountable | **C**onsulted |
 | Review PR ke Branch `main` | **R**esponsible | **A**ccountable | **I**nformed |
 | Pembuatan Tag Rilis SemVer (`vX.Y.Z`) | **R**esponsible | **A**ccountable | **I**nformed |
-| Penyediaan VM & Reverse Proxy | **I**nformed | **C**onsulted | **R**esponsible / **A**ccountable |
+| Penyediaan VM & Reverse Proxy SSL | **I**nformed | **C**onsulted | **R**esponsible / **A**ccountable |
 | Eksekusi Rilis ke VM Production | **I**nformed | **C**onsulted | **R**esponsible / **A**ccountable |
-| Pemantauan Log & Backup Server | **C**onsulted | **I**nformed | **R**esponsible / **A**ccountable |
+| Pemantauan Log, Resource, & Backup Server | **C**onsulted | **I**nformed | **R**esponsible / **A**ccountable |

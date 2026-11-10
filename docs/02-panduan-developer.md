@@ -8,8 +8,8 @@ Panduan ini ditujukan bagi programmer/developer di lingkungan Diskominfo Pemkab 
 
 Sesuai *Juknis Pedoman Pembangunan dan Pengembangan Aplikasi Pemkab Landak*, developer **tidak perlu membuat repositori sendiri**:
 
-1. **Admin Organisasi GitHub** akan membuatkan repositori resmi di bawah organisasi `diskominfo-landak`. Nama repositori disesuaikan dengan nama subdomain produksi yang direncanakan (misal: `simpeg`).
-2. Admin Organisasi GitHub akan meminta username akun GitHub Anda dan memasukkannya sebagai kontributor (`Write`) pada repositori tersebut.
+1. **GitOps Administrator** akan membuatkan repositori resmi di bawah organisasi `diskominfo-landak`. Nama repositori disesuaikan dengan nama subdomain produksi yang direncanakan (misal: `simpeg`).
+2. GitOps Administrator akan meminta username akun GitHub Anda dan memasukkannya sebagai kontributor (`Write`) pada repositori tersebut.
 3. Anda cukup melakukan `git clone` repositori tersebut ke laptop Anda, lalu menyalin berkas template GitOps dari repositori `Petunjuk-GitOps`:
    - **Laravel (PHP 8.3 + MySQL 8.4)**: Salin isi [`template/laravel/`](../template/laravel/)
    - **CodeIgniter (CI 4 / CI 3)**: Salin isi [`template/codeigniter/`](../template/codeigniter/)
@@ -34,7 +34,7 @@ repositori-aplikasi-anda/
 
 ## 2. Tanggung Jawab Database & Pengelolaan Variabel `.env`
 
-Di lingkungan GitOps, developer **tidak diberikan akses SSH langsung ke server VM**. Seluruh perubahan struktur database dan konfigurasi harus disampaikan melalui repositori Git dan koordinasi aman dengan Admin:
+Di lingkungan GitOps, developer **tidak diberikan akses SSH langsung ke server VM**. Seluruh perubahan struktur database dan konfigurasi harus disampaikan melalui repositori Git dan koordinasi aman dengan GitOps Administrator:
 
 ### A. Seluruh Perubahan Database Wajib Menggunakan Migration
 - **Dilarang keras** mengubah tabel atau kolom secara manual di database server.
@@ -48,11 +48,11 @@ Di lingkungan GitOps, developer **tidak diberikan akses SSH langsung ke server V
 - **Nilai Wajib Menggunakan Nilai Contoh / Dummy**: 
   Di file `.env.docker.example`, nilainya adalah nilai contoh/dummy (misal: `PAYMENT_API_KEY=masukkan_api_key_disini`). **JANGAN PERNAH** menaruh password asli atau kredensial rahasia di file `.env.docker.example` karena file ini ter-commit ke Git.
 
-### C. Cara Menyerahkan Kredensial Sensitif (API Key / Password) ke VM Administrator
+### C. Cara Menyerahkan Kredensial Sensitif (API Key / Password) ke GitOps Administrator
 Jika aplikasi Anda membutuhkan kredensial rahasia sungguhan (misal: production API Key, secret Keycloak, atau password akun Superadmin untuk seeder):
 1. **Dilarang Keras** menaruh data rahasia di Git commit, issue, atau Pull Request.
-2. Serahkan nilai rahasia tersebut kepada **Admin VM / Admin Organisasi GitHub** melalui **jalur komunikasi privat yang aman** (misal: pesan langsung terenkripsi / bertatap muka).
-3. Admin VM yang akan memasukkan nilai rahasia tersebut ke dalam file `/opt/apps/<nama-aplikasi>/.env` di server fisik saat proses deployment.
+2. Serahkan nilai rahasia tersebut kepada **GitOps Administrator** melalui **jalur komunikasi privat yang aman** (misal: pesan langsung terenkripsi / bertatap muka).
+3. GitOps Administrator yang akan memasukkan nilai rahasia tersebut ke dalam file `/opt/apps/<nama-aplikasi>/.env` di server fisik saat proses deployment.
 
 ---
 
@@ -79,7 +79,7 @@ Buka file `compose.yaml` di root proyek Anda, lalu sesuaikan **4 titik konfigura
      - `127.0.0.1` artinya container hanya mengizinkan koneksi lokal dari Reverse Proxy (Nginx utama VM) di server yang sama. Pengunjung dari internet luar tetap mengakses lewat domain resmi HTTPS port 443 yang aman.
    - **PENTING TENTANG NOMOR PORT (misal `8081`)**:
      - Di laptop lokal pengembang, Anda bebas memakai nomor port berapa saja yang kosong.
-     - Namun di server VM, nomor port tidak boleh tabrakan antar aplikasi. **Tanyakan/minta alokasi nomor port server resmi kepada Admin Organisasi GitHub / Admin Infrastruktur** (contoh: FINDA dapat port `8081`, SIMPEG dapat port `8082`, dst.).
+     - Namun di server VM, nomor port tidak boleh tabrakan antar aplikasi. **Tanyakan/minta alokasi nomor port server resmi kepada GitOps Administrator** (contoh: FINDA dapat port `8081`, SIMPEG dapat port `8082`, dst.).
 2. **Layanan API Internal (Machine-to-Machine di belakang `api-gateway`)**:
    - **Hapus** atau beri tanda komentar (`#`) pada blok `ports:`:
      ```yaml
@@ -144,5 +144,5 @@ docker compose down
 Ketika fitur di VM Development sudah diuji dan dinyatakan stabil:
 1. Buka repositori di GitHub, lalu buat **Pull Request (PR)** dari branch `development` menuju branch **`main`**.
 2. Berikan judul yang jelas (contoh: `Rilis Fitur Presensi v1.1.0`) dan tuliskan changelog perubahan serta informasi variabel baru di file `.env.docker.example` jika ada.
-3. Informasikan kepada **Admin Organisasi GitHub** untuk dilakukan review manual dan persetujuan penggabungan (*merge*).
-4. Setelah PR di-merge ke `main`, Admin Organisasi GitHub akan menerbitkan Tag Rilis SemVer resmi (`vX.Y.Z`), dan tim infrastruktur akan memasangnya ke VM Production.
+3. Informasikan kepada **GitOps Administrator** untuk dilakukan review manual dan persetujuan penggabungan (*merge*).
+4. Setelah PR di-merge ke `main`, GitOps Administrator akan menerbitkan Tag Rilis SemVer resmi (`vX.Y.Z`), dan Network Administrator akan memasangnya ke VM Production.

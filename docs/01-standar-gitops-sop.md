@@ -4,13 +4,20 @@ Dokumen ini memuat standar penamaan, pengelolaan branch, alur rilis SemVer, sert
 
 ---
 
-## 1. Kebijakan Repositori & Penamaan
+## 1. Kebijakan Repositori & Penamaan Subdomain
 
-- **Organisasi GitHub**: Seluruh repositori resmi berada di bawah organisasi GitHub Diskominfo Landak (`github.com/diskominfo-landak`).
-- **Penamaan Repositori**: Huruf kecil, pemisah tanda hubung (`-`), mencerminkan fungsi atau nama sistem.
-  - Contoh: `api-referensi`, `api-gateway`, `finda-app`.
-- **Nama Image Container (GHCR)**:
-  - Format: `ghcr.io/diskominfo-landak/<nama-repo>:<tag>`
+Sesuai dengan *Juknis Pedoman Pembangunan dan Pengembangan Aplikasi Pemkab Landak*:
+
+1. **Organisasi GitHub Terpusat**: Seluruh repositori resmi wajib berada di bawah organisasi GitHub resmi Diskominfo Landak (`github.com/diskominfo-landak`).
+2. **Standar Penamaan Repositori**: 
+   - Wajib menggunakan huruf kecil dan tanda hubung (`-`).
+   - **Nama repositori diselaraskan langsung dengan nama subdomain produksi aplikasi**.
+   - *Contoh*: Jika aplikasi beralamat di `https://simpeg.landakkab.go.id`, maka nama repositorinya wajib **`simpeg`** (atau `simpeg-app`).
+3. **Pemberian Domain Lingkungan Uji (Development)**:
+   - Admin Organisasi / Admin Jaringan secara otomatis akan menetapkan domain development dengan format:
+     `https://<nama-subdomain>-dev.landakkab.go.id` (contoh: `https://simpeg-dev.landakkab.go.id`).
+4. **Nama Image Container (GHCR)**:
+   - Format: `ghcr.io/diskominfo-landak/<nama-repo>:<tag>`
 
 ---
 
@@ -19,15 +26,15 @@ Dokumen ini memuat standar penamaan, pengelolaan branch, alur rilis SemVer, sert
 Sistem menggunakan alur kerja berbasis dua cabang utama:
 
 1. **`development` (Lingkungan Uji / Development)**:
-   - Cabang integrasi aktif.
-   - Setiap `git push` ke cabang ini akan otomatis memicu build container di GitHub Actions dan mengunggah image dengan tag `development` serta tag hash singkat (`sha-xxxxxxx`).
+   - Cabang integrasi aktif harian bagi pengembang.
+   - Setiap `git push` ke cabang ini otomatis memicu build container di GitHub Actions dan mengunggah image dengan tag `development` serta tag hash singkat (`sha-xxxxxxx`).
    - VM Development menarik image ini secara otomatis melalui cron tiap 5 menit.
 2. **`main` (Lingkungan Produksi / Stable)**:
    - Cabang kode sumber yang stabil dan siap rilis.
-   - Penggabungan ke `main` dilakukan melalui **Pull Request (PR)** setelah pengujian di development tuntas.
+   - Penggabungan kode ke `main` **hanya boleh dilakukan melalui Pull Request (PR)** setelah pengujian di VM development dinyatakan tuntas.
 3. **Tag Rilis Produksi (`vX.Y.Z`)**:
    - Rilis produksi **WAJIB** menggunakan tag Semantic Versioning (SemVer), contoh: `v1.0.0`, `v1.0.1`, `v1.1.0`.
-   - Pembuatan tag ini di GitHub akan memicu workflow CI untuk mem-build image dengan tag bernomor (`1.0.0`) yang akan dipasang ke VM Production.
+   - Pembuatan tag ini di GitHub akan memicu workflow CI untuk mem-build image dengan tag bernomor (`1.0.0`) yang akan dipasang ke VM Production oleh Network Administrator.
 
 ---
 
@@ -45,12 +52,20 @@ Sistem menggunakan alur kerja berbasis dua cabang utama:
 
 ## 4. Matriks Tanggung Jawab (RACI)
 
+### Definisi Tingkat Peran (RACI):
+- **Responsible (R)**: Pihak yang bertugas mengeksekusi dan menyelesaikan pekerjaan teknis secara langsung.
+- **Accountable (A)**: Pihak yang memegang tanggung jawab akhir, berhak mengambil keputusan/persetujuan (*approval*), dan memastikan pekerjaan tuntas. Hanya ada 1 pihak Accountable per aktivitas.
+- **Consulted (C)**: Pihak yang dimintai masukan, pendapat, atau koordinasi dua arah sebelum keputusan/tindakan diambil.
+- **Informed (I)**: Pihak yang mendapatkan pemberitahuan atau laporan satu arah mengenai progres atau hasil pekerjaan.
+
+### Matriks Aktivitas:
+
 | Aktivitas | Tim Aplikasi (Developer) | Admin GitHub Organisasi | Network Administrator (Infrastruktur) |
 |---|---|---|---|
 | Penulisan Kode & Unit Test | **R**esponsible | **A**ccountable | **I**nformed |
 | Pembuatan Repositori & Template | **C**onsulted | **R**esponsible / **A**ccountable | **I**nformed |
 | Review PR ke Branch `main` | **R**esponsible | **A**ccountable | **I**nformed |
-| Pembuatan Tag Rilis (`vX.Y.Z`) | **R**esponsible | **A**ccountable | **I**nformed |
+| Pembuatan Tag Rilis SemVer (`vX.Y.Z`) | **R**esponsible | **A**ccountable | **I**nformed |
 | Penyediaan VM & Reverse Proxy | **I**nformed | **C**onsulted | **R**esponsible / **A**ccountable |
 | Eksekusi Rilis ke VM Production | **I**nformed | **C**onsulted | **R**esponsible / **A**ccountable |
-| Pemantauan Log & Kesehatan Server | **C**onsulted | **I**nformed | **R**esponsible / **A**ccountable |
+| Pemantauan Log & Backup Server | **C**onsulted | **I**nformed | **R**esponsible / **A**ccountable |

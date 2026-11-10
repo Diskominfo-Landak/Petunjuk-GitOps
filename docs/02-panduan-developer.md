@@ -4,32 +4,31 @@ Panduan ini ditujukan bagi programmer/developer di lingkungan Diskominfo Pemkab 
 
 ---
 
-## 1. Struktur Proyek & Penggunaan Folder `src/`
+## 1. Alur Memulai Proyek Aplikasi Baru
 
-Pada standar GitOps Pemkab Landak, berkas infrastruktur kontainerisasi (Docker & CI/CD) berada di **root repositori**, sedangkan seluruh kode sumber aplikasi Anda diletakkan di dalam **folder `src/`**:
+Sesuai *Juknis Pedoman Pembangunan dan Pengembangan Aplikasi Pemkab Landak*, developer **tidak perlu membuat repositori sendiri**:
 
+1. **Admin Organisasi GitHub** akan membuatkan repositori resmi di bawah organisasi `diskominfo-landak`. Nama repositori disesuaikan dengan nama subdomain produksi yang direncanakan (misal: `simpeg`).
+2. Admin Organisasi GitHub akan meminta username akun GitHub Anda dan memasukkannya sebagai kontributor (`Write`) pada repositori tersebut.
+3. Anda cukup melakukan `git clone` repositori tersebut ke laptop Anda, lalu menyalin berkas template GitOps dari repositori `Petunjuk-GitOps`:
+   - **Laravel (PHP 8.3 + MySQL 8.4)**: Salin isi [`template/laravel/`](../template/laravel/)
+   - **CodeIgniter (CI 4 / CI 3)**: Salin isi [`template/codeigniter/`](../template/codeigniter/)
+
+### Struktur Folder:
+Seluruh file infrastruktur (`Dockerfile`, `compose.yaml`, `.github/`, dll.) berada di **root proyek**, sedangkan seluruh kodingan aplikasi Anda diletakkan di dalam **folder `src/`**:
 ```text
 repositori-aplikasi-anda/
-├── Dockerfile                  # Konfigurasi build image Docker (membaca kode dari src/)
-├── .dockerignore               # Pengecualian file saat proses docker build
+├── Dockerfile                  # Konfigurasi build image Docker
+├── .dockerignore               # Pengecualian file saat proses build
 ├── .gitignore                  # Mencegah file .env dan vendor ikut ter-commit
 ├── .gitattributes              # Menjaga line-ending LF pada skrip Linux
-├── compose.yaml                # Konfigurasi layanan container (app, web, db)
-├── compose.build.yaml          # Override untuk build lokal di laptop developer
+├── compose.yaml                # Konfigurasi container runtime (app, web, db)
+├── compose.build.yaml          # Override untuk build lokal di laptop
 ├── .env.docker.example         # Template variabel environment runtime Docker
 ├── docker/                     # Konfigurasi Nginx, PHP-FPM, dan entrypoint
 ├── .github/workflows/ci.yml    # Pipeline otomatis GitHub Actions ke GHCR
-└── src/                        # << TEMPAT KODE SUMBER APLIKASI ANDA >>
+└── src/                        # << TEMPAT SELURUH KODE APLIKASI ANDA >>
 ```
-
-Pilih template yang sesuai dengan framework aplikasi Anda:
-- **Laravel (PHP 8.3 + MySQL 8.4)**: [`template/laravel/`](../template/laravel/)
-- **CodeIgniter (CI 4 / CI 3)**: [`template/codeigniter/`](../template/codeigniter/)
-
-### Cara Memulai:
-1. Salin seluruh isi folder template pilihan Anda (`template/laravel/` atau `template/codeigniter/`, termasuk file tersembunyi `.gitignore`, `.dockerignore`, `.gitattributes`, `.env.docker.example`, dan `.github/`) ke dalam repositori proyek Anda.
-2. **Jika membuat aplikasi baru dari nol**: Anda bisa langsung mulai mengedit kode di dalam folder `src/` (sudah berisi kerangka proyek murni Laravel atau CodeIgniter 4).
-3. **Jika memigrasikan aplikasi yang sudah ada**: Hapus isi bawaan di dalam folder `src/`, lalu pindahkan seluruh file kode aplikasi Anda ke dalam folder `src/`.
 
 ---
 
@@ -56,21 +55,26 @@ Buka file `compose.yaml` di root proyek Anda, lalu sesuaikan **4 titik konfigura
 
 | Penanda | Bagian di `compose.yaml` | Contoh Penggantian | Aturan & Penjelasan |
 |---|---|---|---|
-| **`[EDIT 1/4]`** | `name: nama-aplikasi` | `name: finda-app` | Nama stack Docker Compose (gunakan nama repositori Anda, huruf kecil). |
-| **`[EDIT 2/4]`** | `image: ghcr.io/diskominfo-landak/nama-aplikasi:${IMAGE_TAG:-development}` | `image: ghcr.io/diskominfo-landak/finda-app:${IMAGE_TAG:-development}` | Wajib sama persis dengan nama repositori GitHub di organisasi `diskominfo-landak`. |
+| **`[EDIT 1/4]`** | `name: nama-aplikasi` | `name: simpeg` | Nama stack Docker Compose (wajib sama dengan nama repositori Anda). |
+| **`[EDIT 2/4]`** | `image: ghcr.io/diskominfo-landak/nama-aplikasi:${IMAGE_TAG:-development}` | `image: ghcr.io/diskominfo-landak/simpeg:${IMAGE_TAG:-development}` | Wajib sama persis dengan nama repositori GitHub di organisasi `diskominfo-landak`. |
 | **`[EDIT 3/4]`** | Blok `ports:` pada service `web` | `"127.0.0.1:8081:80"` *(Web UI)* **atau** hapus blok `ports:` *(API Service)* | Lihat panduan pemilihan port di bawah. |
-| **`[EDIT 4/4]`** | `aliases:` di bawah `networks.api-net` | `- finda-app-web` | Nama domain internal di jaringan Docker `api-net` (`<nama-repo>-web`). |
+| **`[EDIT 4/4]`** | `aliases:` di bawah `networks.api-net` | `- simpeg-web` | Nama domain internal di jaringan Docker `api-net` (`<nama-repo>-web`). |
 
-### Panduan Pemilihan Port (`[EDIT 3/4]`):
-1. **Aplikasi Web Pengguna (Human-facing, diakses via browser)**:
-   - Gunakan mapping port lokal:
+### Panduan Khusus Pemilihan Port (`[EDIT 3/4]`):
+1. **Aplikasi Web Pengguna (Human-facing, memiliki antarmuka login/UI)**:
+   - Gunakan format mapping port lokal:
      ```yaml
      ports:
        - "127.0.0.1:8081:80"
      ```
-   - **Penting**: Nomor port di server VM (misal `8081`, `8082`, dst.) **ditentukan oleh Admin Infrastruktur (Network Administrator)** agar tidak bentrok antar aplikasi di server dan agar didaftarkan ke Reverse Proxy domain resmi `.landakkab.go.id`.
+   - **PENTING TENTANG IP `127.0.0.1`**: 
+     - **TETAP GUNAKAN `127.0.0.1`**, **JANGAN PERNAH** diubah menjadi IP publik VM!
+     - `127.0.0.1` artinya container hanya mengizinkan koneksi lokal dari Reverse Proxy (Nginx utama VM) di server yang sama. Pengunjung dari internet luar tetap mengakses lewat domain resmi HTTPS port 443 yang aman.
+   - **PENTING TENTANG NOMOR PORT (misal `8081`)**:
+     - Di laptop lokal pengembang, Anda bebas memakai nomor port berapa saja yang kosong.
+     - Namun di server VM, nomor port tidak boleh tabrakan antar aplikasi. **Tanyakan/minta alokasi nomor port server resmi kepada Admin Organisasi GitHub / Admin Infrastruktur** (contoh: FINDA dapat port `8081`, SIMPEG dapat port `8082`, dst.).
 2. **Layanan API Internal (Machine-to-Machine di belakang `api-gateway`)**:
-   - **Hapus** atau beri tanda komentar (`#`) pada blok `ports:` sehingga port container tidak terbuka ke host:
+   - **Hapus** atau beri tanda komentar (`#`) pada blok `ports:`:
      ```yaml
      volumes:
        - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
@@ -81,7 +85,7 @@ Buka file `compose.yaml` di root proyek Anda, lalu sesuaikan **4 titik konfigura
          aliases:
            - nama-aplikasi-web
      ```
-   - Layanan Anda akan dipanggil oleh `api-gateway` secara internal melalui jaringan `api-net` menggunakan nama alias (`http://nama-aplikasi-web`).
+   - Layanan Anda akan terlindung di dalam jaringan kabel Docker `api-net` dan hanya bisa dijangkau oleh `api-gateway` via nama alias (`http://nama-aplikasi-web`).
 
 ---
 
@@ -116,30 +120,22 @@ docker compose down
 ## 5. Alur Kerja Git & Publikasi Fitur
 
 ### A. Alur Pengembangan Harian (Branch `development`)
-1. Kembangkan fitur dan pastikan unit test lulus di lokal.
+1. Kembangkan fitur di laptop dan pastikan pengujian lokal lulus.
 2. Commit dan push perubahan ke branch `development`:
    ```bash
    git checkout development
    git add .
-   git commit -m "feat: tambah fitur laporan bulanan"
+   git commit -m "feat: tambah modul presensi"
    git push origin development
    ```
 3. **GitHub Actions** secara otomatis akan:
    - Menjalankan unit test dan pemeriksaan keamanan paket (`composer audit`) di dalam folder `src/`.
    - Mem-build image Docker dan mengunggahnya ke `ghcr.io/diskominfo-landak/<nama-repo>:development`.
-4. Maksimal dalam **5 menit**, cron di **VM Development** akan menarik image baru tersebut dan memperbarui layanan secara otomatis.
+4. Maksimal dalam **5 menit**, server **VM Development** secara otomatis menarik image baru tersebut dan memperbarui aplikasi di domain uji `https://<nama-repo>-dev.landakkab.go.id`.
 
-### B. Prosedur Permohonan Deploy Perdana (Aplikasi Baru Naik ke Server)
-Ketika repositori aplikasi Anda baru pertama kali dibuat dan siap dipasang di server VM Development:
-1. Pastikan branch `development` sudah ter-push dan GitHub Actions berstatus **Hijau (Success)**.
-2. Hubungi **Admin VM / Admin Organisasi** dengan menginformasikan:
-   - Nama repositori GitHub (misal: `diskominfo-landak/simpeg-app`).
-   - Domain yang diinginkan (misal: `simpeg-dev.landakkab.go.id`).
-   - Catatan variabel khusus di `.env.docker.example` jika ada.
-3. Admin VM akan menyiapkan folder `/opt/apps/<nama-aplikasi>`, file `.env` server, dan mendaftarkan port ke Reverse Proxy.
-
-### C. Alur Pengajuan Rilis ke Produksi (Pull Request ke `main`)
-1. Setelah fitur teruji dan stabil di VM Development, buat **Pull Request (PR)** di GitHub dari branch `development` menuju branch `main`.
-2. Sertakan ringkasan perubahan dan catatan migrasi/konfigurasi baru (jika ada) pada deskripsi PR.
-3. **Lead Developer / Admin Organisasi** akan me-review PR, melakukan merge ke `main`, dan menerbitkan **Tag Rilis SemVer** resmi (`vX.Y.Z`, contoh: `v1.0.1`).
-4. Setelah GitHub Actions selesai mem-build image bernomor (`1.0.1`), **Network Administrator** akan memasang versi tersebut ke VM Production menggunakan skrip `release.sh`.
+### B. Alur Pengajuan Rilis ke Produksi (Pull Request ke `main`)
+Ketika fitur di VM Development sudah diuji dan dinyatakan stabil:
+1. Buka repositori di GitHub, lalu buat **Pull Request (PR)** dari branch `development` menuju branch **`main`**.
+2. Berikan judul yang jelas (contoh: `Rilis Fitur Presensi v1.1.0`) dan tuliskan changelog perubahan serta informasi variabel baru di file `.env.docker.example` jika ada.
+3. Informasikan kepada **Admin Organisasi GitHub** untuk dilakukan review manual dan persetujuan penggabungan (*merge*).
+4. Setelah PR di-merge ke `main`, Admin Organisasi GitHub akan menerbitkan Tag Rilis SemVer resmi (`vX.Y.Z`), dan tim infrastruktur akan memasangnya ke VM Production.

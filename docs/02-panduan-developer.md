@@ -33,7 +33,24 @@ Pilih template yang sesuai dengan framework aplikasi Anda:
 
 ---
 
-## 2. Empat Bagian yang Wajib Disesuaikan di `compose.yaml`
+## 2. Tanggung Jawab Database & Pengelolaan Variabel `.env`
+
+Di lingkungan GitOps, developer **tidak diberikan akses SSH langsung ke server VM**. Seluruh perubahan struktur database dan konfigurasi harus disampaikan melalui repositori Git:
+
+### A. Seluruh Perubahan Database Wajib Menggunakan Migration
+- **Dilarang keras** mengubah tabel atau kolom secara manual di database server.
+- Buat file migrasi untuk setiap tabel atau kolom baru:
+  - Laravel: `php artisan make:migration create_tabel_baru`
+  - CodeIgniter 4: `php spark make:migration CreateTabelBaru`
+- Saat aplikasi di-deploy ke server, sistem GitOps akan **secara otomatis menjalankan migrasi** (`migrate --force`) saat container menyala.
+
+### B. Mendaftarkan Variabel Konfigurasi di `.env.docker.example`
+- Jika aplikasi Anda membutuhkan variabel baru (misal: `MAIL_HOST`, `S3_BUCKET`, `KEYCLOAK_CLIENT_SECRET`), **wajib daftarkan contoh variabel tersebut di file `.env.docker.example`**.
+- File `.env.docker.example` adalah dokumen acuan bagi Admin Server untuk mengetahui variabel apa saja yang harus diisikan pada file `.env` di server fisik.
+
+---
+
+## 3. Empat Bagian yang Wajib Disesuaikan di `compose.yaml`
 
 Buka file `compose.yaml` di root proyek Anda, lalu sesuaikan **4 titik konfigurasi** yang ditandai dengan `[EDIT 1/4]` sampai `[EDIT 4/4]`:
 
@@ -68,7 +85,7 @@ Buka file `compose.yaml` di root proyek Anda, lalu sesuaikan **4 titik konfigura
 
 ---
 
-## 3. Menjalankan & Menguji Aplikasi di Komputer Lokal
+## 4. Menjalankan & Menguji Aplikasi di Komputer Lokal
 
 Sebelum mendorong kode ke GitHub, uji container di laptop Anda menggunakan `compose.build.yaml`:
 
@@ -87,7 +104,7 @@ docker compose -f compose.yaml -f compose.build.yaml up -d --build
 docker compose ps
 docker compose logs -f app
 
-# 5. Mengakses shell container PHP (untuk menjalankan artisan / migrasi / debug):
+# 5. Mengakses shell container PHP (untuk menjalankan artisan / spark / debug):
 docker compose exec app sh
 
 # 6. Menghentikan container:
@@ -96,7 +113,7 @@ docker compose down
 
 ---
 
-## 4. Alur Kerja Git & Publikasi Fitur
+## 5. Alur Kerja Git & Publikasi Fitur
 
 ### A. Alur Pengembangan Harian (Branch `development`)
 1. Kembangkan fitur dan pastikan unit test lulus di lokal.
@@ -112,7 +129,16 @@ docker compose down
    - Mem-build image Docker dan mengunggahnya ke `ghcr.io/diskominfo-landak/<nama-repo>:development`.
 4. Maksimal dalam **5 menit**, cron di **VM Development** akan menarik image baru tersebut dan memperbarui layanan secara otomatis.
 
-### B. Alur Pengajuan Rilis ke Produksi (Pull Request ke `main`)
+### B. Prosedur Permohonan Deploy Perdana (Aplikasi Baru Naik ke Server)
+Ketika repositori aplikasi Anda baru pertama kali dibuat dan siap dipasang di server VM Development:
+1. Pastikan branch `development` sudah ter-push dan GitHub Actions berstatus **Hijau (Success)**.
+2. Hubungi **Admin VM / Admin Organisasi** dengan menginformasikan:
+   - Nama repositori GitHub (misal: `diskominfo-landak/simpeg-app`).
+   - Domain yang diinginkan (misal: `simpeg-dev.landakkab.go.id`).
+   - Catatan variabel khusus di `.env.docker.example` jika ada.
+3. Admin VM akan menyiapkan folder `/opt/apps/<nama-aplikasi>`, file `.env` server, dan mendaftarkan port ke Reverse Proxy.
+
+### C. Alur Pengajuan Rilis ke Produksi (Pull Request ke `main`)
 1. Setelah fitur teruji dan stabil di VM Development, buat **Pull Request (PR)** di GitHub dari branch `development` menuju branch `main`.
 2. Sertakan ringkasan perubahan dan catatan migrasi/konfigurasi baru (jika ada) pada deskripsi PR.
 3. **Lead Developer / Admin Organisasi** akan me-review PR, melakukan merge ke `main`, dan menerbitkan **Tag Rilis SemVer** resmi (`vX.Y.Z`, contoh: `v1.0.1`).

@@ -13,6 +13,8 @@ Sesuai *Juknis Pedoman Pembangunan dan Pengembangan Aplikasi Pemkab Landak*, dev
 3. Anda cukup melakukan `git clone` repositori tersebut ke laptop Anda, lalu menyalin berkas template GitOps dari repositori `Petunjuk-GitOps`:
    - **Laravel (PHP 8.3 + MySQL 8.4)**: Salin isi [`template/laravel/`](../template/laravel/)
    - **CodeIgniter (CI 4 / CI 3)**: Salin isi [`template/codeigniter/`](../template/codeigniter/)
+   - **Node.js (Express / Fastify / API / SSR)**: Salin isi [`template/nodejs/`](../template/nodejs/)
+   - **PHP Native / Legacy**: Salin isi [`template/php-native/`](../template/php-native/)
 
 ### Struktur Folder:
 Seluruh file infrastruktur (`Dockerfile`, `compose.yaml`, `.github/`, dll.) berada di **root proyek**, sedangkan seluruh kodingan aplikasi Anda diletakkan di dalam **folder `src/`**:

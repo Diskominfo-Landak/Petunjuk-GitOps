@@ -49,7 +49,9 @@ Petunjuk-GitOps/
 └── docs/                              # Panduan pengembangan aplikasi
     ├── 01-standar-gitops-sop.md       # Standar penamaan, branch, SemVer, & alur rilis
     ├── 02-panduan-developer.md        # Panduan teknis untuk programmer/developer OPD
-    └── 03-integrasi-sso-keycloak.md   # Panduan integrasi SSO Keycloak (ASN & Publik)
+    ├── 03-integrasi-sso.md            # Konsep arsitektur SSO Pemkab Landak (ASN & Publik)
+    ├── panduan-sso-laravel.md         # Tutorial integrasi SSO untuk Laravel
+    └── panduan-sso-codeigniter.md     # Tutorial integrasi SSO untuk CodeIgniter 4
 ```
 
 ---
@@ -61,4 +63,6 @@ Bagi pengembang sistem atau programmer OPD yang ingin menerapkan standar GitOps 
 1. Pelajari tata cara branch dan standar Semantic Versioning di [`docs/01-standar-gitops-sop.md`](docs/01-standar-gitops-sop.md).
 2. Ikuti langkah pembuatan dan pengujian lokal di [`docs/02-panduan-developer.md`](docs/02-panduan-developer.md).
 3. Salin berkas konfigurasi dari folder [`template/laravel`](template/laravel) atau [`template/codeigniter`](template/codeigniter) ke dalam repositori aplikasi Anda.
-4. Jika aplikasi membutuhkan autentikasi pengguna (ASN atau Masyarakat), pelajari integrasinya di [`docs/03-integrasi-sso-keycloak.md`](docs/03-integrasi-sso-keycloak.md).
+4. Jika aplikasi membutuhkan autentikasi login pengguna:
+   - Pelajari konsep SSO di [`docs/03-integrasi-sso.md`](docs/03-integrasi-sso.md).
+   - Ikuti tutorial teknis sesuai framework Anda: [`docs/panduan-sso-laravel.md`](docs/panduan-sso-laravel.md) atau [`docs/panduan-sso-codeigniter.md`](docs/panduan-sso-codeigniter.md).

@@ -40,16 +40,19 @@ Petunjuk-GitOps/
 │
 ├── template/                          # Template siap pakai untuk proyek baru OPD
 │   ├── laravel/                       # Template Laravel 12 + PHP 8.3 Alpine + MySQL 8.4
-│   └── codeigniter/                   # Template CodeIgniter (CI 4 / CI 3) + PHP Alpine
+│   ├── codeigniter/                   # Template CodeIgniter (CI 4 / CI 3) + PHP Alpine
+│   ├── nodejs/                        # Template Node.js 20 Alpine (Express / API / SSR)
+│   └── php-native/                    # Template PHP Native / Legacy + Nginx
 │
 ├── ops/                               # Skrip operasional rujukan untuk server
 │   ├── update-dev.sh                  # Skrip penarik image otomatis di VM Development
 │   └── release.sh                     # Skrip rilis produksi dengan auto-rollback
 │
-└── docs/                              # Panduan pengembangan aplikasi
+└── docs/                              # Panduan pengembangan aplikasi & arsitektur
     ├── 01-standar-gitops-sop.md       # Standar penamaan, branch, SemVer, & alur rilis
     ├── 02-panduan-developer.md        # Panduan teknis untuk programmer/developer OPD
     ├── 03-integrasi-sso.md            # Konsep arsitektur SSO Pemkab Landak (ASN & Publik)
+    ├── 04-arsitektur-keselarasan-kalbar-swarm.md # Arsitektur keselarasan (Swarm vs Compose)
     ├── panduan-sso-laravel.md         # Tutorial integrasi SSO untuk Laravel
     └── panduan-sso-codeigniter.md     # Tutorial integrasi SSO untuk CodeIgniter 4
 ```
@@ -62,7 +65,12 @@ Bagi pengembang sistem atau programmer OPD yang ingin menerapkan standar GitOps 
 
 1. Pelajari tata cara branch dan standar Semantic Versioning di [`docs/01-standar-gitops-sop.md`](docs/01-standar-gitops-sop.md).
 2. Ikuti langkah pembuatan dan pengujian lokal di [`docs/02-panduan-developer.md`](docs/02-panduan-developer.md).
-3. Salin berkas konfigurasi dari folder [`template/laravel`](template/laravel) atau [`template/codeigniter`](template/codeigniter) ke dalam repositori aplikasi Anda.
+3. Salin berkas konfigurasi dari folder template yang sesuai ke repositori aplikasi Anda:
+   - [`template/laravel`](template/laravel) (Laravel 12 / PHP 8.3)
+   - [`template/codeigniter`](template/codeigniter) (CodeIgniter 4 / CI 3)
+   - [`template/nodejs`](template/nodejs) (Node.js 20 / Express)
+   - [`template/php-native`](template/php-native) (PHP Native / Legacy)
 4. Jika aplikasi membutuhkan autentikasi login pengguna:
    - Pelajari konsep SSO di [`docs/03-integrasi-sso.md`](docs/03-integrasi-sso.md).
    - Ikuti tutorial teknis sesuai framework Anda: [`docs/panduan-sso-laravel.md`](docs/panduan-sso-laravel.md) atau [`docs/panduan-sso-codeigniter.md`](docs/panduan-sso-codeigniter.md).
+5. Pelajari perbandingan arsitektur teknis dan justifikasi regulasi KepBup di [`docs/04-arsitektur-keselarasan-kalbar-swarm.md`](docs/04-arsitektur-keselarasan-kalbar-swarm.md).

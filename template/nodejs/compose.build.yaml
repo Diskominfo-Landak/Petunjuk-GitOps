@@ -1,0 +1,11 @@
+# compose.build.yaml
+# Dipakai HANYA untuk membangun image di mesin lokal laptop/PC developer:
+#
+#   docker compose -f compose.yaml -f compose.build.yaml up -d --build
+#
+# Di server VM, file ini TIDAK DIPAKAI karena VM menarik image jadi dari GHCR.
+services:
+  app:
+    build:
+      context: .
+    image: nama-aplikasi-node:local

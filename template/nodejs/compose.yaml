@@ -1,0 +1,59 @@
+# [EDIT 1/4] Ganti dengan nama repositori / proyek aplikasi Anda (huruf kecil, tanda hubung)
+name: nama-aplikasi-node
+
+services:
+  app:
+    # [EDIT 2/4] Ganti 'nama-aplikasi-node' dengan nama repositori GitHub Anda
+    image: ghcr.io/diskominfo-landak/nama-aplikasi-node:${IMAGE_TAG:-development}
+    restart: unless-stopped
+    env_file: .env
+    # --------------------------------------------------------------------------
+    # [EDIT 3/4] PILIHAN PORT (Sesuaikan dengan jenis aplikasi):
+    # - Opsi A (Aplikasi Web / Human-facing): Buka port lokal ke Reverse Proxy VM.
+    #   Nomor port di server VM (misal 8083) ditentukan oleh Admin Infrastruktur.
+    # - Opsi B (API Service / Machine-to-Machine): Hapus atau beri tanda '#' pada
+    #   blok 'ports:' di bawah agar hanya bisa diakses dari dalam via api-gateway.
+    # --------------------------------------------------------------------------
+    ports:
+      - "127.0.0.1:8083:3000"
+    networks:
+      internal:
+      api-net:
+        aliases:
+          # [EDIT 4/4] Ganti dengan '<nama-aplikasi-node>-web' (nama host internal di jaringan Docker api-net)
+          - nama-aplikasi-node-web
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:3000/healthz || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  # Opsional: Aktifkan service db jika aplikasi memerlukan database lokal container
+  # db:
+  #   image: mysql:8.4
+  #   restart: unless-stopped
+  #   environment:
+  #     MYSQL_DATABASE: ${DB_DATABASE:-app_db}
+  #     MYSQL_USER: ${DB_USERNAME:-app_user}
+  #     MYSQL_PASSWORD: ${DB_PASSWORD:-app_password}
+  #     MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_password}
+  #   volumes:
+  #     - db-data:/var/lib/mysql
+  #   networks:
+  #     - internal
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p$$MYSQL_ROOT_PASSWORD --silent"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 10
+  #     start_period: 30s
+
+networks:
+  internal:
+  api-net:
+    name: api-net
+    external: true
+
+# volumes:
+#   db-data:

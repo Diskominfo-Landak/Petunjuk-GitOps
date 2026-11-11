@@ -99,24 +99,65 @@ Buka file `compose.yaml` di root proyek Anda, lalu sesuaikan **4 bagian** berpen
 Tidak semua komputer pengembang memiliki spesifikasi RAM/CPU yang memadai untuk menjalankan Docker. Pilih **salah satu jalur** di bawah ini:
 
 ### Jalur A: Laptop Tanpa Docker (Langsung Push ke GitHub)
+
 Jika komputer Anda belum terpasang Docker (hanya menggunakan Laragon / XAMPP):
-1. Pastikan aplikasi di folder `src/` berjalan normal di Laragon/XAMPP.
-2. Pastikan migrasi dan seeder bersih dari nol:
+
+1. **Langkah 1 — Minta Nama Repositori & Hak Akses ke Admin GitOps**:
+   - Sampaikan username akun GitHub Anda kepada **Admin GitOps**.
+   - Admin GitOps akan membuatkan repositori resmi di `https://github.com/Diskominfo-Landak/<nama-repo>` sesuai nama subdomain yang disepakati (misal: `simpeg`, `finda`), serta menambahkan akun Anda sebagai kolaborator.
+   - Minta juga alokasi **nomor port upstream** internal (misal: `8081`) untuk diisi pada penanda `[EDIT 3/4]` di `compose.yaml`.
+
+2. **Langkah 2 — Pastikan Aplikasi Lokal Siap**:
+   - Pastikan aplikasi di folder `src/` berjalan normal di Laragon/XAMPP.
+   - Pastikan migrasi dan seeder bersih dari nol:
+     ```bash
+     cd src
+     php artisan migrate:fresh --seed
+     php artisan test
+     cd ..
+     ```
+   - Pastikan ke-4 titik `[EDIT 1/4]` s.d. `[EDIT 4/4]` di `compose.yaml` dan variabel di `.env.docker.example` sudah disesuaikan dengan `<nama-repo>`.
+
+3. **Langkah 3 — Tutorial Inisialisasi Git Remote & Push Pertama Kali**:
+   Ikuti langkah berikut agar tidak bingung saat pertama kali menghubungkan laptop ke repositori GitHub organisasi:
    ```bash
-   cd src
-   php artisan migrate:fresh --seed
-   php artisan test
-   cd ..
-   ```
-3. Pastikan ke-4 titik `[EDIT 1/4]` s.d. `[EDIT 4/4]` di `compose.yaml` dan variabel di `.env.docker.example` sudah disesuaikan.
-4. Langsung commit dan push ke branch `development`:
-   ```bash
+   # 1. Buka terminal di root direktori proyek (bukan di dalam folder src/)
+   cd /path/ke/proyek-laravel   # misal: cd C:\laragon\www\finda
+
+   # 2. Inisialisasi git lokal jika belum ada
+   git init
+
+   # 3. Buat dan berpindah ke branch 'development'
    git checkout -b development
+
+   # 4. Hubungkan remote repository GitHub:
+   # Periksa apakah remote 'origin' sudah pernah disetel sebelumnya:
+   git remote -v
+
+   # Jika BELUM ADA remote, tambahkan URL repo dari Admin GitOps:
+   git remote add origin https://github.com/Diskominfo-Landak/<nama-repo>.git
+
+   # Jika SUDAH ADA remote lama (misal sisa clone template), ubah URL-nya:
+   git remote set-url origin https://github.com/Diskominfo-Landak/<nama-repo>.git
+
+   # 5. Pastikan file rahasia .env lokal TIDAK ikut ter-commit:
+   git status
+
+   # 6. Tambahkan seluruh berkas dan commit perdana:
    git add .
-   git commit -m "feat: inisialisasi proyek dengan template gitops"
+   git commit -m "feat: inisialisasi proyek laravel dengan template gitops"
+
+   # 7. Push PERDANA ke branch development dengan flag '-u' (upstream):
    git push -u origin development
    ```
-   > **GitHub Actions** di cloud akan otomatis menguji kode Anda, mem-build image Docker (termasuk menjalankan `npm run build`), dan **Server VM Development** akan otomatis mengeksekusi migrasi serta seeder awal!
+   > 💡 **Catatan Flag `-u` (`--set-upstream`)**:
+   > Perintah `git push -u origin development` hanya dijalankan **1 kali di awal** untuk mengaitkan branch lokal ke GitHub. Untuk push fitur harian berikutnya, Anda cukup mengetik:
+   > ```bash
+   > git push
+   > ```
+
+4. **Langkah 4 — Pantau CI/CD GitHub Actions**:
+   Buka tab **Actions** di repositori GitHub Anda. GitHub Actions akan otomatis menguji kode, mem-build Docker image (`ghcr.io/diskominfo-landak/<nama-repo>:development`), dan Server VM Development akan otomatis men-deploy container ke `https://<nama-repo>-dev.landakkab.go.id`!
 
 ---
 

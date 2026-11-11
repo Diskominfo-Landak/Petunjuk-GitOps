@@ -41,13 +41,36 @@ Di file `.env.docker.example`:
 ## 🚀 Pengujian & Publikasi (Pilih Sesuai Spesifikasi Laptop)
 
 ### Jalur A: Laptop Tanpa Docker (Langsung Push ke GitHub)
-Jika laptop Anda tidak memiliki Docker, pastikan aplikasi berjalan normal di Laragon/XAMPP lokal, lalu langsung push ke branch `development`:
-```bash
-git checkout -b development
-git add .
-git commit -m "feat: inisialisasi aplikasi php-native dengan template gitops"
-git push -u origin development
-```
+
+Jika komputer Anda belum terpasang Docker (hanya menggunakan Laragon / XAMPP):
+
+1. **Langkah 1 — Minta Nama Repositori & Hak Akses ke Admin GitOps**:
+   - Sampaikan username GitHub Anda ke **Admin GitOps** untuk dibuatkan repositori resmi di `https://github.com/Diskominfo-Landak/<nama-repo>` dan diundang sebagai kolaborator.
+   - Minta juga alokasi **nomor port upstream** internal (misal: `8084`) untuk penanda `[EDIT 3/4]` di `compose.yaml`.
+
+2. **Langkah 2 — Pastikan Aplikasi Lokal Siap**:
+   - Pastikan aplikasi berjalan normal di Laragon/XAMPP lokal.
+   - Pastikan penanda `[EDIT 1/4]` s.d. `[EDIT 4/4]` di `compose.yaml` dan `.env.docker.example` sudah disesuaikan dengan `<nama-repo>`.
+
+3. **Langkah 3 — Inisialisasi Git Remote & Push Pertama Kali**:
+   ```bash
+   cd /path/ke/proyek-php-native
+   git init
+   git checkout -b development
+
+   # Periksa remote dan set URL repositori resmi dari Admin GitOps:
+   git remote -v
+   git remote add origin https://github.com/Diskominfo-Landak/<nama-repo>.git
+   # (atau 'git remote set-url origin ...' jika remote sudah pernah ada)
+
+   git add .
+   git commit -m "feat: inisialisasi aplikasi php-native dengan template gitops"
+   git push -u origin development
+   ```
+   > 💡 Flag `-u origin development` hanya dijalankan **1 kali di awal**. Untuk push selanjutnya, cukup ketik `git push`.
+
+4. **Langkah 4 — Pantau CI/CD GitHub Actions**:
+   Buka tab **Actions** di GitHub untuk melihat proses build image dan deployment otomatis ke VM Development!
 
 ### Jalur B: Uji Coba Container di Laptop (Jika Memiliki Docker)
 

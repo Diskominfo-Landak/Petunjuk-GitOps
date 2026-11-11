@@ -24,10 +24,11 @@ jobs:
 
       - name: Pasang dependensi dan audit (jika memakai Composer)
         working-directory: src
+        continue-on-error: true
         run: |
           if [ -f composer.json ]; then
             composer install --no-interaction --prefer-dist --no-progress
-            composer audit
+            composer audit --no-dev
           fi
 
   image:

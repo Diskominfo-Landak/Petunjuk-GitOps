@@ -35,7 +35,9 @@ jobs:
         run: |
           if [ -f package.json ]; then
             npm ci || npm install
-            npm run build
+            if grep -q '"build"' package.json; then
+              npm run build
+            fi
           fi
 
       - name: Siapkan environment tes

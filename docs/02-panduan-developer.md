@@ -241,6 +241,11 @@ docker compose logs -f app
 4. Maksimal dalam **5 menit**, server **VM Development** secara otomatis menarik image baru tersebut, menjalankan migrasi (serta seeder awal jika database baru), dan memperbarui aplikasi di domain uji `https://<nama-repo>-dev.landakkab.go.id`.
 
 ### B. Alur Pengajuan Rilis ke Produksi (Pull Request ke `main`)
+
+> [!CAUTION]
+> **DILARANG KERAS PUSH LANGSUNG KE `main`**:
+> Jangan pernah menjalankan `git push origin main` dari komputer lokal Anda! Branch `main` mencerminkan kode stabil produksi. Setiap direct push ke `main` akan memicu workflow CI dan berisiko merusak sistem jika terjadi kesalahan. Semua rilis ke `main` **WAJIB** melalui mekanisme **Pull Request (PR)** dari branch `development`.
+
 Ketika fitur di VM Development sudah diuji dan dinyatakan stabil:
 1. Buka repositori di GitHub, lalu buat **Pull Request (PR)** dari branch `development` menuju branch **`main`**. *(Anda tidak perlu mengubah nomor port di `compose.yaml` saat membuat PR ini).*
 2. Berikan judul yang jelas (contoh: `Rilis Fitur Presensi v1.1.0`) dan tuliskan changelog perubahan serta informasi variabel baru di file `.env.docker.example` jika ada.

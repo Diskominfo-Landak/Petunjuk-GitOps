@@ -21,17 +21,28 @@ Sesuai dengan *Juknis Pedoman Pembangunan dan Pengembangan Aplikasi Pemkab Landa
 
 ---
 
-## 2. Kebijakan Percabangan (Branching Strategy)
+## 2. Kebijakan Percabangan (Branching Strategy) & Inisialisasi Repositori
 
-Sistem menggunakan alur kerja berbasis dua cabang utama:
+### A. Prosedur Inisialisasi Repositori oleh GitOps Administrator:
+Sebelum repositori diserahkan kepada programmer/developer:
+1. **Pembuatan Repositori**: Buat repositori baru di bawah organisasi `github.com/diskominfo-landak/<nama-repo>`.
+2. **Baseline Awal (`main`)**: Masukkan berkas template GitOps awal ke branch **`main`**.
+3. **Pencabangan (`development`)**: Buat branch **`development`** dari branch `main`.
+4. **Proteksi & Default Branch**:
+   - **Jika Repositori Public**: Pasang *Branch Protection Rule* pada branch `main` (centang *Require a pull request before merging* dan *Require status checks to pass*).
+   - **Jika Repositori Private (Tier GitHub Free)**: Masuk ke menu **Settings** $\to$ **General** $\to$ **Default branch** $\to$ ubah Default Branch dari `main` menjadi **`development`**. Dengan cara ini, saat developer melakukan `git clone`, laptop mereka otomatis mengarah ke `development` dan meminimalkan salah dorong ke `main`.
+5. **Undang Developer**: Masukkan akun GitHub developer ke repositori dengan hak akses **Write**, lalu serahkan URL repositori.
+
+### B. Dua Cabang Utama Sistem GitOps:
 
 1. **`development` (Lingkungan Uji / Development)**:
    - Cabang integrasi aktif harian bagi pengembang.
+   - Seluruh pekerjaan harian, penambahan fitur, dan perbaikan bug **hanya di-push ke cabang ini**.
    - Setiap `git push` ke cabang ini otomatis memicu build container di GitHub Actions dan mengunggah image dengan tag `development` serta tag hash singkat (`sha-xxxxxxx`).
    - VM Development menarik image ini secara otomatis melalui cron tiap 5 menit.
 2. **`main` (Lingkungan Produksi / Stable)**:
-   - Cabang kode sumber yang stabil dan siap rilis.
-   - Penggabungan kode ke `main` **hanya boleh dilakukan melalui Pull Request (PR)** setelah pengujian di VM development dinyatakan tuntas.
+   - Cabang kode sumber yang stabil dan siap rilis ke masyarakat.
+   - **DILARANG KERAS melakukan push langsung ke `main`**. Penggabungan kode ke `main` **hanya boleh dilakukan melalui Pull Request (PR)** setelah pengujian di VM development dinyatakan tuntas.
 3. **Tag Rilis Produksi (`vX.Y.Z`)**:
    - Rilis produksi **WAJIB** menggunakan tag Semantic Versioning (SemVer), contoh: `v1.0.0`, `v1.0.1`, `v1.1.0`.
    - Pembuatan tag ini di GitHub akan memicu workflow CI untuk mem-build image dengan tag bernomor (`1.0.0`) yang akan dipasang ke VM Production oleh Network Administrator.

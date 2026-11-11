@@ -25,28 +25,51 @@ Template kontainerisasi siap pakai untuk aplikasi berbasis **PHP Native / Legacy
 
 ---
 
-## 🚀 Cara Menjalankan di Komputer Lokal
+## ⚙️ 4 Titik Edit di `compose.yaml` & `.env.docker.example`
 
-1. Buat jaringan Docker bersama:
-   ```bash
-   docker network create api-net 2>/dev/null || true
-   ```
-2. Salin variabel environment:
-   ```bash
-   cp .env.docker.example .env
-   ```
-3. Build dan jalankan container lokal:
-   ```bash
-   docker compose -f compose.yaml -f compose.build.yaml up -d --build
-   ```
-4. Akses di browser: `http://localhost:8084` atau `http://localhost:8084/healthz.php`.
+Sebelum push ke repositori GitHub, sesuaikan:
+1. `[EDIT 1/4]` : Ganti nama proyek (`name: nama-aplikasi-php`).
+2. `[EDIT 2/4]` : Sesuaikan nama image (`image: ghcr.io/diskominfo-landak/nama-aplikasi-php:${IMAGE_TAG:-development}`).
+3. `[EDIT 3/4]` : Alokasikan port lokal (misal `"127.0.0.1:8084:80"`). Nomor port ini ditentukan 1 kali bersama Admin Infrastruktur dan **tidak perlu diubah** saat merge ke `main`.
+4. `[EDIT 4/4]` : Sesuaikan alias jaringan Docker (`- nama-aplikasi-php-web`).
+
+Di file `.env.docker.example`:
+- Pastikan `DB_HOST=db` (jangan `127.0.0.1`) dan `DB_USERNAME` menggunakan nama user biasa (**dilarang mengisi `root`**).
 
 ---
 
-## ⚙️ 4 Titik Edit di `compose.yaml`
+## 🚀 Pengujian & Publikasi (Pilih Sesuai Spesifikasi Laptop)
 
-Sebelum push ke repositori GitHub:
-1. `[EDIT 1/4]` : Ganti nama proyek (`name: nama-aplikasi-php`).
-2. `[EDIT 2/4]` : Sesuaikan nama image (`image: ghcr.io/diskominfo-landak/nama-aplikasi-php:${IMAGE_TAG:-development}`).
-3. `[EDIT 3/4]` : Alokasikan port lokal (misal `"127.0.0.1:8084:80"`).
-4. `[EDIT 4/4]` : Sesuaikan alias jaringan Docker (`- nama-aplikasi-php-web`).
+### Jalur A: Laptop Tanpa Docker (Langsung Push ke GitHub)
+Jika laptop Anda tidak memiliki Docker, pastikan aplikasi berjalan normal di Laragon/XAMPP lokal, lalu langsung push ke branch `development`:
+```bash
+git checkout -b development
+git add .
+git commit -m "feat: inisialisasi aplikasi php-native dengan template gitops"
+git push -u origin development
+```
+
+### Jalur B: Uji Coba Container di Laptop (Jika Memiliki Docker)
+
+> **Catatan Pengguna WSL 2 (Ubuntu)**: Jika Docker Anda terpasang di dalam distro Ubuntu WSL 2, jalankan perintah di bawah ini dari terminal Ubuntu WSL (`cd /mnt/c/laragon/www/nama-proyek`).
+
+#### 1. Buat Jaringan `api-net` & Salin `.env`
+
+**Opsi Terminal Linux / macOS / WSL 2 (Ubuntu):**
+```bash
+docker network create api-net 2>/dev/null || true
+cp .env.docker.example .env
+```
+
+**Opsi Terminal Windows PowerShell:**
+```powershell
+docker network create api-net
+Copy-Item .env.docker.example .env
+```
+
+#### 2. Build dan Jalankan di Docker Lokal
+```bash
+docker compose -f compose.yaml -f compose.build.yaml up -d --build
+docker compose ps
+```
+Akses di browser: `http://localhost:8084` atau `http://localhost:8084/healthz.php`.

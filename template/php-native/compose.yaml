@@ -27,10 +27,12 @@ services:
         condition: service_healthy
     volumes:
       - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./src:/var/www/html:ro
     # --------------------------------------------------------------------------
     # [EDIT 3/4] PILIHAN PORT (Sesuaikan dengan jenis aplikasi):
     # - Opsi A (Aplikasi Web / Human-facing): Buka port lokal ke Reverse Proxy VM.
     #   Nomor port di server VM (misal 8084) ditentukan oleh Admin Infrastruktur.
+    #   Catatan: Port ini TIDAK PERLU diubah saat merge dari development ke main.
     # - Opsi B (API Service / Machine-to-Machine): Hapus atau beri tanda '#' pada
     #   blok 'ports:' di bawah agar hanya bisa diakses dari dalam via api-gateway.
     # --------------------------------------------------------------------------

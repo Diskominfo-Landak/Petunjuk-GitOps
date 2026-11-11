@@ -49,8 +49,9 @@ Petunjuk-GitOps/
 │   └── release.sh                     # Skrip rilis produksi dengan auto-rollback
 │
 └── docs/                              # Panduan pengembangan aplikasi & arsitektur
-    ├── 01-standar-gitops-sop.md       # Standar penamaan, branch, SemVer, & alur rilis
+    ├── 01-standar-gitops-sop.md       # Standar penamaan, branch, SemVer, RACI & alur rilis
     ├── 02-panduan-developer.md        # Panduan teknis untuk programmer/developer OPD
+    ├── panduan-admin-gitops.md        # Panduan GitOps Administrator (Kelola GitHub & VM Dev)
     ├── 03-integrasi-sso.md            # Konsep arsitektur SSO Pemkab Landak (ASN & Publik)
     ├── 04-arsitektur-keselarasan-kalbar-swarm.md # Arsitektur keselarasan (Swarm vs Compose)
     ├── 05-standar-keamanan-aplikasi.md # Standar secure coding & mitigasi judi online / deface

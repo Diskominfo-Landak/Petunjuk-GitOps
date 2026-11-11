@@ -75,3 +75,7 @@ Tatanan tata kelola GitOps Pemkab Landak dibagi ke dalam **3 Peran Utama**:
 | Penyediaan VM & Reverse Proxy SSL | **I**nformed | **C**onsulted | **R**esponsible / **A**ccountable |
 | Eksekusi Rilis ke VM Production | **I**nformed | **C**onsulted | **R**esponsible / **A**ccountable |
 | Pemantauan Log, Resource, & Backup Server | **C**onsulted | **I**nformed | **R**esponsible / **A**ccountable |
+
+### Rujukan Panduan Praktis Berdasarkan Peran:
+- Bagi **Developer**: Ikuti tutorial lengkap pembuatan aplikasi, pengujian lokal, dan Git remote di [`docs/02-panduan-developer.md`](02-panduan-developer.md).
+- Bagi **GitOps Administrator**: Ikuti tutorial inisialisasi VM Development, manajemen port upstream, review manual PR, dan rilis SemVer di [`docs/panduan-admin-gitops.md`](panduan-admin-gitops.md).

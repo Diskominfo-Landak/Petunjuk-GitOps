@@ -51,6 +51,25 @@ proyek-laravel-anda/
   2. Salin seluruh berkas proyek Laravel Anda ke dalam folder `src/` (pastikan file `artisan` dan `composer.json` berada tepat di `src/artisan` dan `src/composer.json`).
   3. Pastikan endpoint kesehatan `/up` aktif (bawaan default Laravel 11+ di `bootstrap/app.php` melalui `health: '/up'`).
   4. **Penting untuk Migrasi & Seeder**: Pastikan seluruh migrasi dan seeder Anda berjalan bersih pada database kosong (`php artisan migrate:fresh --seed`), karena container Docker akan membuat database baru dari nol.
+  5. **Wajib Tambahkan Konfigurasi Reverse Proxy HTTPS (Mencegah Tampilan Polosan / Mixed Content)**:
+     Seluruh server Pemkab Landak berjalan di balik Reverse Proxy SSL. Agar file CSS/JS Vite tidak diblokir oleh browser karena masalah *Mixed Content* (link aset dihasilkan via `http://` padahal website diakses via `https://`), tambahkan 2 hal berikut pada kode proyek Anda:
+     - Di `src/bootstrap/app.php`:
+       ```php
+       ->withMiddleware(function (Middleware $middleware): void {
+           $middleware->trustProxies(at: '*');
+       })
+       ```
+     - Di `src/app/Providers/AppServiceProvider.php` (dalam fungsi `boot()`):
+       ```php
+       use Illuminate\Support\Facades\URL;
+
+       public function boot(): void
+       {
+           if (str_starts_with((string) config('app.url'), 'https://') || ! app()->environment('local')) {
+               URL::forceScheme('https');
+           }
+       }
+       ```
 
 ---
 

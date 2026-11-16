@@ -126,6 +126,11 @@ Jika komputer Anda belum terpasang Docker (hanya menggunakan Laragon / XAMPP):
      php artisan test
      cd ..
      ```
+   - **Khusus Proyek Laravel (Mencegah Aset CSS/JS Terblokir / Mixed Content)**:
+     Karena seluruh aplikasi Pemkab Landak berjalan di balik Reverse Proxy SSL, pastikan kode Laravel Anda mengenali koneksi HTTPS:
+     1. Di `src/bootstrap/app.php`: Tambahkan `$middleware->trustProxies(at: '*');`
+     2. Di `src/app/Providers/AppServiceProvider.php`: Tambahkan `\Illuminate\Support\Facades\URL::forceScheme('https');` pada fungsi `boot()` jika `APP_URL` menggunakan `https://`.
+     *(Langkah ini menjamin Vite dan helper `asset()` selalu menghasilkan skema `https://`, sehingga file CSS/JS tidak diblokir oleh browser).*
    - Pastikan ke-4 titik `[EDIT 1/4]` s.d. `[EDIT 4/4]` di `compose.yaml` dan variabel di `.env.docker.example` sudah disesuaikan dengan `<nama-repo>` dari Admin GitOps.
 3. **Langkah 3 — Tutorial Inisialisasi Git Remote & Push Pertama Kali**:
    Agar tidak bingung menghubungkan proyek laptop Anda ke repositori GitHub organisasi:

@@ -41,11 +41,13 @@ proyek-ci-anda/
 - **Untuk CodeIgniter 4 (Default Bawaan Template)**:
   - Folder `src/` sudah berisi instalasi kerangka CodeIgniter 4 (`codeigniter4/appstarter`) murni.
   - Jika memindahkan proyek CI 4 yang sudah jadi, hapus isi `src/` lalu salin seluruh berkas proyek CI 4 Anda ke dalam `src/`.
+  - **Wajib untuk Reverse Proxy SSL**: Pastikan di `app/Config/App.php` telah menyetel `$proxyIPs = ['0.0.0.0/0' => 'X-Forwarded-For'];` dan `$forceGlobalSecureRequests = true;` agar fungsi `base_url()` selalu menghasilkan `https://` dan tidak terjadi *Mixed Content*.
 - **Untuk CodeIgniter 3 (Aplikasi Warisan / Lama)**:
   1. Hapus isi folder `src/`, lalu salin seluruh berkas proyek CI 3 Anda ke dalam `src/`.
-  2. Di file `docker/nginx.conf`, ubah web root dari `/var/www/html/public` menjadi `/var/www/html`, dan ubah `SCRIPT_FILENAME` menjadi `/var/www/html/index.php`.
-  3. Di file `compose.yaml`, hapus atau komentari baris volume `- app-writable:/var/www/html/writable` dan ganti mount `app-public` dengan `- ./src:/var/www/html:ro` pada service `web`.
-  4. Jika aplikasi CI 3 belum kompatibel dengan PHP 8.2, ubah baris `FROM php:8.2-fpm-alpine` pada `Dockerfile` menjadi `FROM php:7.4-fpm-alpine`.
+  2. Di file `application/config/config.php`, pastikan `$config['base_url'] = 'https://subdomain.landakkab.go.id/';` diawali dengan **`https://`** (bukan `http://`).
+  3. Di file `docker/nginx.conf`, ubah web root dari `/var/www/html/public` menjadi `/var/www/html`, dan ubah `SCRIPT_FILENAME` menjadi `/var/www/html/index.php`.
+  4. Di file `compose.yaml`, hapus atau komentari baris volume `- app-writable:/var/www/html/writable` dan ganti mount `app-public` dengan `- ./src:/var/www/html:ro` pada service `web`.
+  5. Jika aplikasi CI 3 belum kompatibel dengan PHP 8.2, ubah baris `FROM php:8.2-fpm-alpine` pada `Dockerfile` menjadi `FROM php:7.4-fpm-alpine`.
 
 ---
 

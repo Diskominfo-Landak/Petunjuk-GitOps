@@ -37,7 +37,7 @@ services:
     #   blok 'ports:' di bawah agar hanya bisa diakses dari dalam via api-gateway.
     # --------------------------------------------------------------------------
     ports:
-      - "127.0.0.1:8084:80"
+      - "8084:80"
     networks:
       internal:
       api-net:

@@ -15,7 +15,7 @@ services:
     #   blok 'ports:' di bawah agar hanya bisa diakses dari dalam via api-gateway.
     # --------------------------------------------------------------------------
     ports:
-      - "127.0.0.1:8083:3000"
+      - "8083:3000"
     networks:
       internal:
       api-net:

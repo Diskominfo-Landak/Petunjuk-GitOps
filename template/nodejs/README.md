@@ -29,7 +29,7 @@ Template kontainerisasi siap pakai untuk aplikasi berbasis **Node.js** (Express,
 Sebelum push ke GitHub, sesuaikan penanda berikut di `compose.yaml`:
 1. `[EDIT 1/4]` : Nama proyek (`name: nama-aplikasi-node`).
 2. `[EDIT 2/4]` : Image GHCR (`image: ghcr.io/diskominfo-landak/nama-aplikasi-node:${IMAGE_TAG:-development}`).
-3. `[EDIT 3/4]` : Port lokal (misal `"127.0.0.1:8083:3000"`). Nomor port ini ditentukan 1 kali bersama Admin Infrastruktur dan **tidak perlu diubah** saat merge ke `main`.
+3. `[EDIT 3/4]` : Port kontainer (misal `"8083:3000"`). Gunakan format `"<nomor_port>:3000"` tanpa awalan `127.0.0.1:` agar tidak 504 Gateway Timeout. Nomor port ini ditentukan 1 kali bersama Admin Infrastruktur dan **tidak perlu diubah** saat merge ke `main`.
 4. `[EDIT 4/4]` : Alias internal network (`- nama-aplikasi-node-web`).
 
 Di file `.env.docker.example`:

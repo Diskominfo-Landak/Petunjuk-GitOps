@@ -84,22 +84,23 @@ Buka file `compose.yaml` di root proyek Anda, lalu sesuaikan **4 titik konfigura
 |---|---|---|---|
 | **`[EDIT 1/4]`** | `name: nama-aplikasi` | `name: finda` | Nama stack Docker Compose (wajib sama dengan nama repositori Anda). |
 | **`[EDIT 2/4]`** | `image: ghcr.io/diskominfo-landak/nama-aplikasi:${IMAGE_TAG:-development}` | `image: ghcr.io/diskominfo-landak/finda:${IMAGE_TAG:-development}` | Wajib sama persis dengan nama repositori GitHub di organisasi `diskominfo-landak`. |
-| **`[EDIT 3/4]`** | Blok `ports:` pada service `web` | `"127.0.0.1:8081:80"` *(Web UI)* **atau** hapus blok `ports:` *(API Service)* | Lihat panduan pemilihan port di bawah. |
+| **`[EDIT 3/4]`** | Blok `ports:` pada service `web` | `"8081:80"` *(Web UI)* **atau** hapus blok `ports:` *(API Service)* | Lihat panduan pemilihan port di bawah. |
 | **`[EDIT 4/4]`** | `aliases:` di bawah `networks.api-net` | `- finda-web` | Nama domain internal di jaringan Docker `api-net` (`<nama-repo>-web`). |
 
 ### Panduan Khusus Pemilihan Port (`[EDIT 3/4]`):
 1. **Aplikasi Web Pengguna (Human-facing, memiliki antarmuka login/UI)**:
-   - Gunakan format mapping port lokal:
+   - Gunakan format mapping port:
      ```yaml
      ports:
-       - "127.0.0.1:8081:80"
+       - "8081:80"
      ```
-   - **PENTING TENTANG IP `127.0.0.1`**: 
-     - **TETAP GUNAKAN `127.0.0.1`**, **JANGAN PERNAH** diubah menjadi IP publik VM!
-     - `127.0.0.1` artinya container hanya mengizinkan koneksi lokal dari Reverse Proxy (Nginx utama VM) di server yang sama. Pengunjung dari internet luar tetap mengakses lewat domain resmi HTTPS port 443 yang aman.
-   - **PENTING TENTANG NOMOR PORT (misal `8081`)**:
+   - **PENTING TENTANG FORMAT PORT (`<nomor_port>:80`)**:
+     - Gunakan format `"<nomor_port>:80"` (contoh: `"7010:80"` atau `"8081:80"`).
+     - **JANGAN** menggunakan awalan `127.0.0.1:` (seperti `"127.0.0.1:7010:80"`).
+     - **Mengapa?** Karena server Reverse Proxy depan (seperti OpenResty / Nginx Proxy Manager) sering kali berada pada kontainer terpisah atau VM reverse proxy tersendiri di jaringan server. Jika port dikunci ke `127.0.0.1`, Reverse Proxy depan tidak akan bisa meneruskan koneksi ke kontainer ini dan akan berujung pada error **HTTP 504 Gateway Time-out**.
+   - **PENTING TENTANG NOMOR PORT (misal `7010` atau `8081`)**:
      - Di laptop lokal pengembang, Anda bebas memakai nomor port berapa saja yang kosong.
-     - Untuk server VM, **tanyakan/minta alokasi nomor port resmi 1 kali di awal kepada GitOps Administrator** (contoh: FINDA dapat port `8081`, SIMPEG dapat port `8082`).
+     - Untuk server VM, **tanyakan/minta alokasi nomor port resmi 1 kali di awal kepada GitOps Administrator** (contoh: FINDA dapat port `7010`, SIMPEG dapat port `8082`).
      - **Apakah port ini perlu diganti saat merge PR dari `development` ke `main`?** **TIDAK PERLU.** Karena VM Development dan VM Production adalah dua server yang terpisah, nomor port di `compose.yaml` dibuat **sama persis (identik)** antara branch `development` dan `main`.
 2. **Layanan API Internal (Machine-to-Machine di belakang `api-gateway`)**:
    - **Hapus** atau beri tanda komentar (`#`) pada blok `ports:` agar layanan hanya bisa dijangkau oleh `api-gateway` dari dalam jaringan Docker `api-net` melalui nama alias (`http://nama-aplikasi-web`).

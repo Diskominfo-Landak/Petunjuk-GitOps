@@ -36,14 +36,18 @@ services:
       - app-public:/var/www/html/public:ro
     # --------------------------------------------------------------------------
     # [EDIT 3/4] PILIHAN PORT (Sesuaikan dengan jenis aplikasi):
-    # - Opsi A (Aplikasi Web / Human-facing): Buka port lokal ke Reverse Proxy VM.
-    #   Nomor port di server VM (misal 8082) ditentukan oleh Admin Infrastruktur.
+    # - Opsi A (Aplikasi Web / Human-facing): Buka port ke Reverse Proxy VM.
+    #   Gunakan format: "<nomor_port>:80" (misal "8082:80" atau "7010:80").
+    #   Nomor port ditentukan oleh Admin Infrastruktur / Tim Jaringan.
+    #   PENTING: Jangan gunakan prefix "127.0.0.1:" agar Reverse Proxy depan
+    #   (seperti OpenResty / Nginx Proxy Manager) dapat menjangkau port ini tanpa
+    #   terkena error 504 Gateway Time-out.
     #   Catatan: Port ini TIDAK PERLU diubah saat merge dari development ke main.
     # - Opsi B (API Service / Machine-to-Machine): Hapus atau beri tanda '#' pada
     #   blok 'ports:' di bawah agar hanya bisa diakses dari dalam via api-gateway.
     # --------------------------------------------------------------------------
     ports:
-      - "127.0.0.1:8082:80"
+      - "8082:80"
     networks:
       internal:
       api-net:

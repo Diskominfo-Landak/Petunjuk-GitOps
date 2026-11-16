@@ -100,16 +100,17 @@ Buka file `compose.yaml` di root proyek Anda, lalu sesuaikan **4 bagian** berpen
 |---|---|---|---|
 | **`[EDIT 1/4]`** | `name: nama-aplikasi` | `name: finda` | Nama proyek Docker Compose (wajib sama dengan nama repo). |
 | **`[EDIT 2/4]`** | `image: ghcr.io/diskominfo-landak/nama-aplikasi:${IMAGE_TAG:-development}` | `image: ghcr.io/diskominfo-landak/finda:${IMAGE_TAG:-development}` | Sesuaikan `nama-aplikasi` dengan nama repositori GitHub Anda (huruf kecil). |
-| **`[EDIT 3/4]`** | Blok `ports:` pada service `web` | `"127.0.0.1:8081:80"` *(Web UI)* **atau** hapus blok `ports:` *(API Service)* | Lihat penjelasan **Opsi Port** di bawah. Nomor port **tidak perlu diganti** saat merge PR dari `development` ke `main`. |
+| **`[EDIT 3/4]`** | Blok `ports:` pada service `web` | `"8081:80"` *(Web UI)* **atau** hapus blok `ports:` *(API Service)* | Lihat penjelasan **Opsi Port** di bawah. Nomor port **tidak perlu diganti** saat merge PR dari `development` ke `main`. |
 | **`[EDIT 4/4]`** | `aliases:` di bawah `networks.api-net` | `- finda-web` | Nama panggilan internal container di jaringan Docker `api-net`. |
 
 #### Penjelasan Khusus `[EDIT 3/4]` (Pilihan Port Web UI vs API Service):
 1. **Jika Aplikasi Web Pengguna (Human-facing, memiliki halaman login/UI)**:
-   - Pertahankan blok `ports: - "127.0.0.1:8081:80"`.
+   - Gunakan format port: `ports: - "8081:80"`.
+   - **PENTING**: Gunakan format `"<nomor_port>:80"`. **JANGAN** menggunakan awalan `127.0.0.1:` (seperti `"127.0.0.1:8081:80"`). Hal ini agar Reverse Proxy server luar (seperti OpenResty / Nginx Proxy Manager) dapat meneruskan trafik ke kontainer ini tanpa terkena error **HTTP 504 Gateway Time-out**.
    - Saat diuji di laptop lokal, Anda bebas menggunakan port berapa saja yang kosong (misal `8081`).
    - Saat akan dipasang ke Server VM, **koordinasikan nomor port tersebut 1 kali di awal dengan GitOps / Network Administrator** agar tidak bentrok dengan aplikasi OPD lain. Nomor port ini tetap sama untuk branch `development` maupun `main`.
 2. **Jika Layanan API Internal (Machine-to-Machine di belakang `api-gateway`)**:
-   - **Hapus** atau beri tanda komentar (`#`) pada baris `ports:` dan `- "127.0.0.1:8081:80"`, sehingga layanan API hanya dapat diakses dari dalam jaringan `api-net` via alias (`http://nama-aplikasi-web`).
+   - **Hapus** atau beri tanda komentar (`#`) pada baris `ports:` dan `- "8081:80"`, sehingga layanan API hanya dapat diakses dari dalam jaringan `api-net` via alias (`http://nama-aplikasi-web`).
 
 ---
 

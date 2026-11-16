@@ -30,7 +30,7 @@ Template kontainerisasi siap pakai untuk aplikasi berbasis **PHP Native / Legacy
 Sebelum push ke repositori GitHub, sesuaikan:
 1. `[EDIT 1/4]` : Ganti nama proyek (`name: nama-aplikasi-php`).
 2. `[EDIT 2/4]` : Sesuaikan nama image (`image: ghcr.io/diskominfo-landak/nama-aplikasi-php:${IMAGE_TAG:-development}`).
-3. `[EDIT 3/4]` : Alokasikan port lokal (misal `"127.0.0.1:8084:80"`). Nomor port ini ditentukan 1 kali bersama Admin Infrastruktur dan **tidak perlu diubah** saat merge ke `main`.
+3. `[EDIT 3/4]` : Alokasikan port kontainer (misal `"8084:80"`). Gunakan format `"<nomor_port>:80"` tanpa awalan `127.0.0.1:` agar tidak 504 Gateway Timeout. Nomor port ini ditentukan 1 kali bersama Admin Infrastruktur dan **tidak perlu diubah** saat merge ke `main`.
 4. `[EDIT 4/4]` : Sesuaikan alias jaringan Docker (`- nama-aplikasi-php-web`).
 
 Di file `.env.docker.example`:

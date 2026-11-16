@@ -81,7 +81,7 @@ Buka file `compose.yaml` di root proyek Anda, lalu sesuaikan **4 bagian** yang t
 |---|---|---|---|
 | **`[EDIT 1/4]`** | `name: nama-aplikasi-ci` | `name: simpeg` | Nama proyek Docker Compose di server VM. |
 | **`[EDIT 2/4]`** | `image: ghcr.io/diskominfo-landak/nama-aplikasi-ci:${IMAGE_TAG:-development}` | `image: ghcr.io/diskominfo-landak/simpeg:${IMAGE_TAG:-development}` | Sesuaikan dengan nama repositori GitHub Anda (huruf kecil). |
-| **`[EDIT 3/4]`** | Blok `ports:` pada service `web` | `"127.0.0.1:8082:80"` *(Web UI)* **atau** hapus blok `ports:` *(API Service)* | Nomor port ditentukan 1 kali di awal bersama Admin Infrastruktur dan **tidak perlu diubah** saat merge ke `main`. |
+| **`[EDIT 3/4]`** | Blok `ports:` pada service `web` | `"8082:80"` *(Web UI)* **atau** hapus blok `ports:` *(API Service)* | Gunakan format `"<nomor_port>:80"`. Dilarang memakai awalan `127.0.0.1:` agar tidak 504 Gateway Timeout. Nomor port ditentukan 1 kali di awal bersama Admin Infrastruktur dan **tidak perlu diubah** saat merge ke `main`. |
 | **`[EDIT 4/4]`** | `aliases:` di bawah `networks.api-net` | `- simpeg-web` | Nama panggilan internal container di jaringan Docker `api-net`. |
 
 ---

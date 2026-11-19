@@ -56,6 +56,7 @@ Petunjuk-GitOps/
     ├── 05-standar-keamanan-aplikasi.md # Standar secure coding & mitigasi judi online / deface
     ├── 06-manajemen-proyek-github.md  # Manajemen tugas tim (Kanban Board & GitHub Issues)
     ├── panduan-pembuatan-akun-github.md # Panduan onboarding GitHub & 2FA untuk staf/magang baru
+    ├── panduan-export-database-developer.md # Panduan export database lokal untuk import ke VM GitOps
     ├── panduan-sso-laravel.md         # Tutorial integrasi SSO untuk Laravel
     └── panduan-sso-codeigniter.md     # Tutorial integrasi SSO untuk CodeIgniter 4
 ```
@@ -80,3 +81,4 @@ Bagi pengembang sistem, programmer OPD, atau tenaga magang yang ingin menerapkan
    - Pelajari konsep SSO di [`docs/03-integrasi-sso.md`](docs/03-integrasi-sso.md).
    - Ikuti tutorial teknis sesuai framework Anda: [`docs/panduan-sso-laravel.md`](docs/panduan-sso-laravel.md) atau [`docs/panduan-sso-codeigniter.md`](docs/panduan-sso-codeigniter.md).
 8. Pelajari perbandingan arsitektur teknis dan justifikasi regulasi KepBup di [`docs/04-arsitektur-keselarasan-kalbar-swarm.md`](docs/04-arsitektur-keselarasan-kalbar-swarm.md).
+9. Jika Anda memiliki data database lokal yang ingin dipindahkan ke server VM Development/Production, ikuti SOP di [`docs/panduan-export-database-developer.md`](docs/panduan-export-database-developer.md).

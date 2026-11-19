@@ -98,10 +98,10 @@ Buka file `compose.yaml` di root proyek Anda, lalu sesuaikan **4 bagian** berpen
 
 | Penanda | Baris di `compose.yaml` | Contoh Penggantian | Penjelasan |
 |---|---|---|---|
-| **`[EDIT 1/4]`** | `name: nama-aplikasi` | `name: finda` | Nama proyek Docker Compose (wajib sama dengan nama repo). |
-| **`[EDIT 2/4]`** | `image: ghcr.io/diskominfo-landak/nama-aplikasi:${IMAGE_TAG:-development}` | `image: ghcr.io/diskominfo-landak/finda:${IMAGE_TAG:-development}` | Sesuaikan `nama-aplikasi` dengan nama repositori GitHub Anda (huruf kecil). |
+| **`[EDIT 1/4]`** | `name: nama-aplikasi` | `name: simpeg` | Nama proyek Docker Compose (wajib sama dengan nama repo). |
+| **`[EDIT 2/4]`** | `image: ghcr.io/diskominfo-landak/nama-aplikasi:${IMAGE_TAG:-development}` | `image: ghcr.io/diskominfo-landak/simpeg:${IMAGE_TAG:-development}` | Sesuaikan `nama-aplikasi` dengan nama repositori GitHub Anda (huruf kecil). |
 | **`[EDIT 3/4]`** | Blok `ports:` pada service `web` | `"8081:80"` *(Web UI)* **atau** hapus blok `ports:` *(API Service)* | Lihat penjelasan **Opsi Port** di bawah. Nomor port **tidak perlu diganti** saat merge PR dari `development` ke `main`. |
-| **`[EDIT 4/4]`** | `aliases:` di bawah `networks.api-net` | `- finda-web` | Nama panggilan internal container di jaringan Docker `api-net`. |
+| **`[EDIT 4/4]`** | `aliases:` di bawah `networks.api-net` | `- simpeg-web` | Nama panggilan internal container di jaringan Docker `api-net`. |
 
 #### Penjelasan Khusus `[EDIT 3/4]` (Pilihan Port Web UI vs API Service):
 1. **Jika Aplikasi Web Pengguna (Human-facing, memiliki halaman login/UI)**:
@@ -124,7 +124,7 @@ Jika komputer Anda belum terpasang Docker (hanya menggunakan Laragon / XAMPP):
 
 1. **Langkah 1 — Minta Nama Repositori & Hak Akses ke Admin GitOps**:
    - Sampaikan username akun GitHub Anda kepada **Admin GitOps**.
-   - Admin GitOps akan membuatkan repositori resmi di `https://github.com/Diskominfo-Landak/<nama-repo>` sesuai nama subdomain yang disepakati (misal: `simpeg`, `finda`), serta menambahkan akun Anda sebagai kolaborator.
+   - Admin GitOps akan membuatkan repositori resmi di `https://github.com/Diskominfo-Landak/<nama-repo>` sesuai nama subdomain yang disepakati (misal: `simpeg`, `perizinan`), serta menambahkan akun Anda sebagai kolaborator.
    - Minta juga alokasi **nomor port upstream** internal (misal: `8081`) untuk diisi pada penanda `[EDIT 3/4]` di `compose.yaml`.
 
 2. **Langkah 2 — Pastikan Aplikasi Lokal Siap**:
@@ -142,7 +142,7 @@ Jika komputer Anda belum terpasang Docker (hanya menggunakan Laragon / XAMPP):
    Ikuti langkah berikut agar tidak bingung saat pertama kali menghubungkan laptop ke repositori GitHub organisasi:
    ```bash
    # 1. Buka terminal di root direktori proyek (bukan di dalam folder src/)
-   cd /path/ke/proyek-laravel   # misal: cd C:\laragon\www\finda
+   cd /path/ke/proyek-laravel   # misal: cd C:\laragon\www\simpeg
 
    # 2. Inisialisasi git lokal jika belum ada
    git init
@@ -214,7 +214,7 @@ Copy-Item .env.docker.example .env
 #### 2. Sesuaikan Isi File `.env` Lokal
 Buka file `.env` yang baru dibuat di root proyek:
 - Isi `APP_KEY=base64:...` (bisa disalin dari `src/.env` lokal Anda).
-- Pastikan `DB_HOST=db` dan `DB_USERNAME` **bukan** `root` (misal: `DB_USERNAME=finda_user`).
+- Pastikan `DB_HOST=db` dan `DB_USERNAME` **bukan** `root` (misal: `DB_USERNAME=app_user`).
 - Isi kredensial lain yang dibutuhkan aplikasi (seperti password Superadmin untuk seeder).
 
 #### 3. Build dan Jalankan Container

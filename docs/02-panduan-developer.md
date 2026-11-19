@@ -8,7 +8,7 @@ Panduan ini ditujukan bagi programmer/developer di lingkungan Diskominfo Pemkab 
 
 Sesuai *Juknis Pedoman Pembangunan dan Pengembangan Aplikasi Pemkab Landak*, developer **tidak perlu membuat repositori sendiri**:
 
-1. **GitOps Administrator** akan membuatkan repositori resmi di bawah organisasi `diskominfo-landak`. Nama repositori disesuaikan dengan nama subdomain produksi yang direncanakan (misal: `simpeg` atau `finda`).
+1. **GitOps Administrator** akan membuatkan repositori resmi di bawah organisasi `diskominfo-landak`. Nama repositori disesuaikan dengan nama subdomain produksi yang direncanakan (misal: `simpeg` atau `perizinan`).
 2. GitOps Administrator akan meminta username akun GitHub Anda dan memasukkannya sebagai kontributor (`Write`) pada repositori tersebut.
 3. Anda cukup melakukan `git clone` repositori tersebut ke laptop Anda, lalu menyalin berkas template GitOps dari repositori `Petunjuk-GitOps`:
    - **Laravel (PHP 8.3 + MySQL 8.4 + Vite)**: Salin isi [`template/laravel/`](../template/laravel/)
@@ -52,20 +52,20 @@ Di lingkungan GitOps, developer **tidak diberikan akses SSH langsung ke server V
 ### B. Aturan Pengisian `.env.docker.example` vs `.env` Lokal Developer
 1. **Biarkan Pengaturan Produksi Default di `.env.docker.example`**:
    ```env
-   APP_NAME=FINDA
+   APP_NAME="Nama Aplikasi"
    APP_ENV=production
    APP_KEY=base64:ISI_DI_ENV_LOKAL_DAN_SERVER
    APP_DEBUG=false
-   APP_URL=https://finda.landakkab.go.id
+   APP_URL=https://nama-aplikasi.landakkab.go.id
    ```
    - Tetap biarkan `APP_ENV=production` dan `APP_DEBUG=false`.
    - Untuk `APP_URL`, **langsung isi dengan alamat subdomain produksi resmi** (bukan alamat `-dev`). Penyesuaian domain `-dev` di VM Development akan diatur oleh GitOps Administrator langsung pada file `.env` fisik di server VM Dev (dan tidak akan tertimpa saat `git pull`).
 2. **Aturan Koneksi Database Docker (`DB_HOST` & `DB_USERNAME`)**:
    - **`DB_HOST=db`**: Di dalam Docker Compose, antarkontainer berkomunikasi menggunakan nama service. Wajib isi `DB_HOST=db`, **jangan** isi `127.0.0.1` atau `localhost`.
-   - **`DB_USERNAME=nama_db_user`**: Wajib menggunakan nama user biasa (misal: `finda_user` atau `db_user`). **DILARANG KERAS mengisi `DB_USERNAME=root`**, karena image resmi MySQL 8.4 akan langsung menolak menyala (*crash*) jika `MYSQL_USER` diisi `root`.
+   - **`DB_USERNAME=nama_db_user`**: Wajib menggunakan nama user biasa (misal: `db_user` atau `app_user`). **DILARANG KERAS mengisi `DB_USERNAME=root`**, karena image resmi MySQL 8.4 akan langsung menolak menyala (*crash*) jika `MYSQL_USER` diisi `root`.
 3. **Nama Variabel Wajib Sama & Nilai Wajib Dummy**:
-   - Seluruh variabel kustom yang digunakan aplikasi di kodingan Anda (misal `PENINK_STATS_API_KEY`, `FINDA_SUPERADMIN_PASSWORD`) **wajib dicantumkan namanya di `.env.docker.example`**.
-   - **JANGAN PERNAH** menaruh password asli, token, atau API key rahasia di `.env.docker.example` karena file ini ter-commit ke Git. Gunakan nilai contoh/dummy (misal: `PENINK_STATS_API_KEY=masukkan_api_key_disini`).
+   - Seluruh variabel kustom yang digunakan aplikasi di kodingan Anda (misal `CUSTOM_API_KEY`, `SERVICE_TOKEN`) **wajib dicantumkan namanya di `.env.docker.example`**.
+   - **JANGAN PERNAH** menaruh password asli, token, atau API key rahasia di `.env.docker.example` karena file ini ter-commit ke Git. Gunakan nilai contoh/dummy (misal: `CUSTOM_API_KEY=masukkan_api_key_disini`).
 4. **Gunakan Format Path Linux**:
    - Container Docker berjalan di atas Linux. Jika aplikasi menyimpan backup atau arsip log ke folder tertentu, gunakan path Linux (misal `/var/www/html/storage/backups`), **jangan** gunakan path drive Windows (`D:/...`).
 
@@ -82,25 +82,25 @@ Buka file `compose.yaml` di root proyek Anda, lalu sesuaikan **4 titik konfigura
 
 | Penanda | Bagian di `compose.yaml` | Contoh Penggantian | Aturan & Penjelasan |
 |---|---|---|---|
-| **`[EDIT 1/4]`** | `name: nama-aplikasi` | `name: finda` | Nama stack Docker Compose (wajib sama dengan nama repositori Anda). |
-| **`[EDIT 2/4]`** | `image: ghcr.io/diskominfo-landak/nama-aplikasi:${IMAGE_TAG:-development}` | `image: ghcr.io/diskominfo-landak/finda:${IMAGE_TAG:-development}` | Wajib sama persis dengan nama repositori GitHub di organisasi `diskominfo-landak`. |
-| **`[EDIT 3/4]`** | Blok `ports:` pada service `web` | `"8081:80"` *(Web UI)* **atau** hapus blok `ports:` *(API Service)* | Lihat panduan pemilihan port di bawah. |
-| **`[EDIT 4/4]`** | `aliases:` di bawah `networks.api-net` | `- finda-web` | Nama domain internal di jaringan Docker `api-net` (`<nama-repo>-web`). |
+| **`[EDIT 1/4]`** | `name: nama-aplikasi` | `name: simpeg` | Nama stack Docker Compose (wajib sama dengan nama repositori Anda). |
+| **`[EDIT 2/4]`** | `image: ghcr.io/diskominfo-landak/nama-aplikasi:${IMAGE_TAG:-development}` | `image: ghcr.io/diskominfo-landak/simpeg:${IMAGE_TAG:-development}` | Wajib sama persis dengan nama repositori GitHub di organisasi `diskominfo-landak`. |
+| **`[EDIT 3/4]`** | Blok `ports:` pada service `web` | `"8082:80"` *(Web UI)* **atau** hapus blok `ports:` *(API Service)* | Lihat panduan pemilihan port di bawah. |
+| **`[EDIT 4/4]`** | `aliases:` di bawah `networks.api-net` | `- simpeg-web` | Nama domain internal di jaringan Docker `api-net` (`<nama-repo>-web`). |
 
 ### Panduan Khusus Pemilihan Port (`[EDIT 3/4]`):
 1. **Aplikasi Web Pengguna (Human-facing, memiliki antarmuka login/UI)**:
    - Gunakan format mapping port:
      ```yaml
      ports:
-       - "8081:80"
+       - "8082:80"
      ```
    - **PENTING TENTANG FORMAT PORT (`<nomor_port>:80`)**:
-     - Gunakan format `"<nomor_port>:80"` (contoh: `"7010:80"` atau `"8081:80"`).
-     - **JANGAN** menggunakan awalan `127.0.0.1:` (seperti `"127.0.0.1:7010:80"`).
+     - Gunakan format `"<nomor_port>:80"` (contoh: `"8082:80"` atau `"8083:80"`).
+     - **JANGAN** menggunakan awalan `127.0.0.1:` (seperti `"127.0.0.1:8082:80"`).
      - **Mengapa?** Karena server Reverse Proxy depan (seperti OpenResty / Nginx Proxy Manager) sering kali berada pada kontainer terpisah atau VM reverse proxy tersendiri di jaringan server. Jika port dikunci ke `127.0.0.1`, Reverse Proxy depan tidak akan bisa meneruskan koneksi ke kontainer ini dan akan berujung pada error **HTTP 504 Gateway Time-out**.
-   - **PENTING TENTANG NOMOR PORT (misal `7010` atau `8081`)**:
+   - **PENTING TENTANG NOMOR PORT (misal `8082` atau `8083`)**:
      - Di laptop lokal pengembang, Anda bebas memakai nomor port berapa saja yang kosong.
-     - Untuk server VM, **tanyakan/minta alokasi nomor port resmi 1 kali di awal kepada GitOps Administrator** (contoh: FINDA dapat port `7010`, SIMPEG dapat port `8082`).
+     - Untuk server VM, **tanyakan/minta alokasi nomor port resmi 1 kali di awal kepada GitOps Administrator** (contoh: SIMPEG dapat port `8082`, Perizinan dapat port `8083`).
      - **Apakah port ini perlu diganti saat merge PR dari `development` ke `main`?** **TIDAK PERLU.** Karena VM Development dan VM Production adalah dua server yang terpisah, nomor port di `compose.yaml` dibuat **sama persis (identik)** antara branch `development` dan `main`.
 2. **Layanan API Internal (Machine-to-Machine di belakang `api-gateway`)**:
    - **Hapus** atau beri tanda komentar (`#`) pada blok `ports:` agar layanan hanya bisa dijangkau oleh `api-gateway` dari dalam jaringan Docker `api-net` melalui nama alias (`http://nama-aplikasi-web`).
@@ -116,7 +116,7 @@ Tidak semua laptop pengembang memiliki kapasitas RAM/CPU untuk menginstal Docker
 Jika komputer Anda belum terpasang Docker (hanya menggunakan Laragon / XAMPP):
 1. **Langkah 1 — Minta Nama Repositori & Hak Akses ke Admin GitOps**:
    - Sampaikan username akun GitHub Anda kepada **Admin GitOps**.
-   - Admin GitOps akan membuatkan repositori resmi di organisasi `https://github.com/Diskominfo-Landak/<nama-repo>` sesuai nama subdomain yang disepakati (misal: `simpeg`, `finda`), serta menambahkan akun Anda sebagai kolaborator.
+   - Admin GitOps akan membuatkan repositori resmi di organisasi `https://github.com/Diskominfo-Landak/<nama-repo>` sesuai nama subdomain yang disepakati (misal: `simpeg`, `perizinan`), serta menambahkan akun Anda sebagai kolaborator.
    - Tanyakan juga kepada Admin GitOps alokasi **nomor port upstream** internal (misal: `8081`) untuk diisikan pada penanda `[EDIT 3/4]` di `compose.yaml`.
 2. **Langkah 2 — Pastikan Aplikasi Lokal Siap**:
    - Pastikan aplikasi di dalam folder `src/` sudah berjalan baik di Laragon/XAMPP.
@@ -209,7 +209,7 @@ Copy-Item .env.docker.example .env
 **2. Sesuaikan isi file `.env` lokal Anda:**
 Buka file `.env` di root proyek:
 - Isi `APP_KEY=base64:...` (bisa disalin dari `src/.env` lokal Anda).
-- Pastikan `DB_HOST=db` dan `DB_USERNAME` **bukan** `root` (misal: `DB_USERNAME=finda_user`).
+- Pastikan `DB_HOST=db` dan `DB_USERNAME` **bukan** `root` (misal: `DB_USERNAME=app_user`).
 - Untuk kemudahan debugging di laptop sendiri, Anda boleh mengubah `APP_ENV=local` dan `APP_DEBUG=true` pada file `.env` lokal ini (file `.env` tidak akan ter-commit ke Git).
 
 **3. Build dan jalankan container di lokal:**
@@ -257,3 +257,32 @@ Ketika fitur di VM Development sudah diuji dan dinyatakan stabil:
 2. Berikan judul yang jelas (contoh: `Rilis Fitur Presensi v1.1.0`) dan tuliskan changelog perubahan serta informasi variabel baru di file `.env.docker.example` jika ada.
 3. Informasikan kepada **GitOps Administrator** untuk dilakukan review manual dan persetujuan penggabungan (*merge*).
 4. Setelah PR di-merge ke `main`, GitOps Administrator akan menerbitkan Tag Rilis SemVer resmi (`vX.Y.Z`), dan Network Administrator akan memasangnya ke VM Production.
+
+---
+
+## 6. Panduan Khusus Aplikasi Frontend SPA (React / Vue) + Laravel Backend
+
+Jika aplikasi Anda menggunakan arsitektur **Single Page Application (SPA)** (misal React/Vue) yang digabungkan dengan Laravel melalui fallback route (`file_get_contents(public_path('index.html'))`):
+
+1. **JANGAN Mengubah `docker/nginx.conf` Menjadi API-Only**:
+   - Tetap gunakan konfigurasi bawaan `docker/nginx.conf` dari template. Konfigurasi ini sudah mendukung penyajian aset statis (`/assets/*.css`, `/assets/*.js`) secara cepat via Nginx langsung, dan hanya mengoper request data / SPA route ke Laravel (`try_files $uri $uri/ /index.php?$query_string`).
+2. **Kewajiban Menyertakan Bundle Hasil Build**:
+   - Jika proyek React dikembangkan secara terpisah di luar Laravel, setiap kali Anda selesai melakukan `npm run build`, Anda **WAJIB menyalin file `index.html` dan seluruh folder `assets/` ke dalam folder `src/public/`** di repositori sebelum melakukan `git push`.
+   - Pastikan file `index.html` dan folder `assets/` terdeteksi oleh Git (`git status`) dan ter-commit ke branch `development`.
+3. **Pilihan Terbaik Jangka Panjang (Monorepo Otomatis)**:
+   - Satukan file `package.json` React Anda ke dalam folder `src/`. Dengan begitu, Dockerfile multi-stage dan pipeline GitHub Actions template kita akan otomatis mengompilasi aset React Anda setiap kali Anda melakukan `git push`, tanpa perlu copy-paste bundle secara manual.
+
+---
+
+## 7. Pemindahan Data Database Lokal ke Server VM (Export Data)
+
+Jika Anda sudah menginput banyak data uji coba di komputer lokal (Laragon / XAMPP) dan ingin memindahkannya ke server VM Development atau Production:
+
+> [!CAUTION]
+> **DILARANG KERAS Commit File `.sql` ke Repositori Git**:
+> Jangan pernah menambahkan file dump database ke dalam Git. File `.sql` rawan kebocoran data kredensial/pribadi dan memperlambat kinerja Git.
+
+Ikuti panduan lengkap: **[`docs/panduan-export-database-developer.md`](panduan-export-database-developer.md)** untuk:
+1. Mengekspor data menggunakan teknik **Data-Only (`--no-create-info --insert-ignore`)** agar tidak bentrok dengan akun seeder/struktur migrasi server.
+2. Melakukan sanitasi data pribadi (kepatuhan UU Perlindungan Data Pribadi No. 27/2022).
+3. Prosedur menyerahkan file dump ke **GitOps Administrator** melalui jalur privat (Google Drive Diskominfo / chat internal).

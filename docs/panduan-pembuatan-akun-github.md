@@ -10,7 +10,7 @@ Panduan ini ditujukan bagi programmer baru, tenaga magang, atau pengembang di li
 2. Masukkan alamat email aktif Anda.
 3. Buat password yang kuat (kombinasi huruf besar, kecil, angka, dan simbol).
 4. Tentukan **Username** GitHub Anda:
-   - Gunakan nama yang profesional dan mudah dikenali (contoh: `budi-landak`, `alfin-aptika`, atau nama asli Anda).
+   - Gunakan nama yang profesional dan mudah dikenali (contoh: `budi-landak`, `programmer-landak`, atau nama asli Anda).
 5. Selesaikan verifikasi captcha dan masukkan kode verifikasi yang dikirimkan ke email Anda.
 
 ---

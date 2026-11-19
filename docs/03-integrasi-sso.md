@@ -11,7 +11,7 @@ Layanan SSO Pemkab Landak memisahkan ruang lingkup pengguna ke dalam dua ranah (
 1. **Ranah ASN (Aparatur Sipil Negara / Pegawai)**:
    - **Identifier Utama**: **NIP (Nomor Induk Pegawai)**.
    - **Sumber Data**: Sinkronisasi data kepegawaian resmi BKPSDM.
-   - **Peruntukan**: Khusus aplikasi internal kedinasan (seperti FINDA, E-Kinerja, Presensi, SIMPEG, dsb.).
+   - **Peruntukan**: Khusus aplikasi internal kedinasan (seperti E-Kinerja, Presensi, SIMPEG, Tata Naskah Dinas, dsb.).
 2. **Ranah Publik (Masyarakat Umum)**:
    - **Identifier Utama**: **Email / Akun Terverifikasi + OTP**.
    - **Peruntukan**: Layanan publik / perizinan / pengaduan masyarakat.
@@ -38,7 +38,7 @@ Untuk menjaga keamanan data riil kepegawaian, Pemkab Landak menyediakan dua endp
 - **Gunakan SSO (OpenID Connect / OIDC)**:
   - Khusus untuk **interaksi manusia (Human-facing applications)** saat pengguna login melalui browser web atau aplikasi mobile.
 - **Gunakan API Key / Gateway Token**:
-  - Khusus untuk **pertukaran data mesin ke mesin (Machine-to-Machine)** antar aplikasi/OPD (misal: Aplikasi FINDA mengambil data wilayah dari `api-referensi` via `api-gateway`).
+  - Khusus untuk **pertukaran data mesin ke mesin (Machine-to-Machine)** antar aplikasi/OPD (misal: Aplikasi Perizinan mengambil data referensi unit kerja dari `api-referensi` via `api-gateway`).
 
 ---
 
